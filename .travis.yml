@@ -17,6 +17,22 @@ addons:
 env:
   global:
     - PYTHON=python3
+   # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
+   #   via the "travis encrypt" command using the project repo's public key
+   - secure: "fQuePcrkMsM8TC6xxoELzjxnSFr+/ft/3aVnn+mugbdWn1n5QF2fuCtEP8KBExEN0+A6ACmTZDgeMrij2WPA/VaNOlLslokRYV9j5j8FbQk17gMObemyQ2uId1HS3OommRMPl7P1ybAmDx848K/ua3exqoU00i8h5wi5aStbCVYS5UPmcIgvInznxrhl2DYUBvLosOvfXnkV+cCizL23kCJW8NXP6QS7FyZmZlW3TXg1DO+a9jAFx/xm4BI2t0OUGDu+UyuA9wxogrI1hYjhSiD/J5bVJ07xuN0Q0y380V4Xy6i+B+I+2cDwYqZryosEVMHS3Y6b0rU1gt+jfK4JoEIUorB6A3rhYJbrSGKqLQ7K3xOY9iOecbGuX312wB3qdfw9X9VRDKGqVf/JLr7cB0Y86CHJeC66jk43r9rfv2Ieqi5z3OeV52zWPUKEV0ZjpeiGFyQAaW7G++6wx8JMbHOe9sxW2KuHvbeO6UCMdEjoiVIbmZr5zE4e7UNttPmyvE6wG4ZNneyPZp81bYU/1qhTPb0zYRko/8NBIe1fJziM6nUS5Tq4S1kTyBhY0U0Sr5JfM8pNqRtNjiG86tbSdJH9eN4GACfZdXmTmS0aSomNtM5FYeXaLUxsbE2ck83eHfSPSJP8uNcSK9r7Cg4pG7ZF6jFX7BgYIQ1KslvYNd0="
+
+before_install:
+  - echo -n | openssl s_client -connect https://scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
+
+addons:
+  coverity_scan:
+    project:
+      name: "ph4r05/trezor-crypto"
+      description: "trezor-crypto fork"
+    notification_email: ph4r05@gmail.com
+    build_command_prepend: "$PYTHON -m pip install --user pytest ecdsa curve25519-donna"
+    build_command: "make"
+    branch_pattern: coverity_scan
 
 install:
   - $PYTHON -m pip install --user pytest ecdsa curve25519-donna
@@ -29,10 +45,3 @@ script:
   - ./tests/test_openssl 1000
   - cd ./tests ; ITERS=10 $PYTHON -m pytest ; cd ..
 
-notifications:
-  webhooks:
-    urls:
-      - http://ci-bot.satoshilabs.com:5000/travis
-    on_success: always
-    on_failure: always
-    on_start: always
