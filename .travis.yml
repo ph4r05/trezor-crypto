@@ -27,7 +27,7 @@ env:
 
 before_install:
   - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
-  - 'if [[ "${TRAVIS_JOB_NUMBER##*.}" == "1" ]]; then curl -s "https://scan.coverity.com/scripts/travisci_build_coverity_scan.sh" | bash || true ; fi'
+  - 'if [[ "${TRAVIS_JOB_NUMBER##*.}" == "1" ]]; then ./cov.sh ; fi'
 
 #addons:
 #  coverity_scan:
