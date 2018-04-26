@@ -18,7 +18,7 @@ env:
   global:
    # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
    #   via the "travis encrypt" command using the project repo's public key
-   - secure: "eeJoigy3dAAxcvEcrJAfgBh05i+Gx7gIScnEJH9EV7p+w4hwbrKQW9K6tezCtOoAkTBvqnxLaPKhaRgdU8hSF0EpZ8qDgmjMNjKQicu5tlZ8WskeJiGTTQQjJMMq7PQ+1biXxiQd/DvR6CA97tTUU9DD90hb6mqtLBW6pH5OTm7d64yBllZ9pL5JYmNIhjTGKnT7nLSL9EQx6bW34rn8fVutIuTQDqh2x0wgXMONLFvO5b3EZCPMUbcCMwbUKTtTZWq0OoOUHA5orXqj5+AjyyAxWHI642RnRQ5Lx/bhEwt+CAqPGQi/ATL3uLQ9zqXjUF+M+5Dawf420xyPNOtimNLVwRbDRh1bFpPuamkApmevsXxleRAyHZp9XCUpm6snrDWkt/JNYsAE3bajO3V/pzaNUyI4DeTNyi1aeBIp5W7TEIuhixKtKGyFNR8HGWjCX8ewiPneUAy8t06rh33ZYxsXOdKi04BxFSJ08XRHc2xZEwH2tFzjAujI45tJsYOo27vZ8aavP7NJ89myw5AIRH9uGHfMmJA1a7ElwWhSlQCTlvu6F2TgA2LqJ2htLWWd51/lyINru95Nl93i+WG2YcYl13L24+m+LSdpqWCBQBBB42WuIhk41LpCJcOnFMBzP9zrjN/2U9M1bnzNeWJ1FP3YLG/GcHhn4VYurIFXWt4="
+   - secure: "HUGExXQibXon24W7wT1VNiIpst1NVwawVtEg2HN2kfKDSk1tjP+TFJdW2CoBUnzPCezaZtX+EXeaT/6RBaxTNC1I1jqjVamN9VLUl9iMc00qIVe7u0cc6LQN2aQdZaPJMayVsAEbIni0SHGrsxmwpG5D6hEYcZPt/GshSYQ72uNSu8pKcm7g2iRm0yhcMmkPojsKR6bC01j27xjBl2WsfXwOPEe2R79LJjeVzMyaZ6dWVj/WGwlJ9pvVYDSP0VAvwfLgk4lpwF4Sin9X5757DCag8Oo/9pRur+PTvVVha1tGCz7fw2fAI1ZWvj7Iq8fqV63lQ1nAHze76yih52MmzvfCLVaei9A3t/pnAPzav0hpma1MEk+qU3YlAZXBJp0mV4dqEoxYQocVImrbnBO0AFngIkAagdNhDpEGCPve2Oc/Dw/cf1vU79wEg7yyA0gxXyZ7Rp6RsopVeNxcqD3dN47DAb91geB5S1sRP8D4jiO6+kET/YCPuMDNN5WbOWFt3Lq40tsAR7zPpJWTS6Ej3RWcuJOVgDHwq490AltvUApomlM5w+fwTfOJE6VMiElnVfVmwpJEmarnQJ/2IF8A2HCoI24RS9GhJLIym9NBWx4dboIRpJzWJ/3tFu7cgppPHk0mf1k/Udk78twJkMm6xcDAA1LEcBz0/WYaOjeodg4="
    - PYTHON=python3
    - COVERITY_SCAN_PROJECT_NAME="ph4r05/trezor-crypto"
    - COVERITY_SCAN_BRANCH_PATTERN="coverity_scan"
@@ -26,6 +26,9 @@ env:
    - COVERITY_SCAN_BUILD_COMMAND='make'
 
 before_install:
+  - env
+  - echo $COVERITY_SCAN_TOKEN
+  - echo $COVERITY_SCAN_BUILD_COMMAND
   - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
   - 'if [[ "${TRAVIS_JOB_NUMBER##*.}" == "1" ]]; then . cov.sh ; fi'
 
