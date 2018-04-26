@@ -26,9 +26,6 @@ env:
    - COVERITY_SCAN_BUILD_COMMAND='make'
 
 before_install:
-  - env
-  - echo $COVERITY_SCAN_TOKEN
-  - echo $COVERITY_SCAN_BUILD_COMMAND
   - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
   - 'if [[ "${TRAVIS_JOB_NUMBER##*.}" == "1" ]]; then . cov.sh ; fi'
 
