@@ -54,7 +54,7 @@ static const int8_t reverse_alphabet_tbl[] = {
     48, 49, 50, 51, 52, 53, 54, 55, 56, 57
 };
 
-inline int8_t reverse_alphabet(char letter){
+static inline int8_t reverse_alphabet(char letter){
   const ssize_t idx = (ssize_t)(letter - alphabet[0]);
   return (int8_t) (idx >= 0 && idx < (ssize_t)alphabet_size ? reverse_alphabet_tbl[idx] : -1);
 }
