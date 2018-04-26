@@ -16,13 +16,10 @@ addons:
 
 env:
   global:
-    - PYTHON=python3
-
-env:
-  global:
    # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
    #   via the "travis encrypt" command using the project repo's public key
    - secure: "eeJoigy3dAAxcvEcrJAfgBh05i+Gx7gIScnEJH9EV7p+w4hwbrKQW9K6tezCtOoAkTBvqnxLaPKhaRgdU8hSF0EpZ8qDgmjMNjKQicu5tlZ8WskeJiGTTQQjJMMq7PQ+1biXxiQd/DvR6CA97tTUU9DD90hb6mqtLBW6pH5OTm7d64yBllZ9pL5JYmNIhjTGKnT7nLSL9EQx6bW34rn8fVutIuTQDqh2x0wgXMONLFvO5b3EZCPMUbcCMwbUKTtTZWq0OoOUHA5orXqj5+AjyyAxWHI642RnRQ5Lx/bhEwt+CAqPGQi/ATL3uLQ9zqXjUF+M+5Dawf420xyPNOtimNLVwRbDRh1bFpPuamkApmevsXxleRAyHZp9XCUpm6snrDWkt/JNYsAE3bajO3V/pzaNUyI4DeTNyi1aeBIp5W7TEIuhixKtKGyFNR8HGWjCX8ewiPneUAy8t06rh33ZYxsXOdKi04BxFSJ08XRHc2xZEwH2tFzjAujI45tJsYOo27vZ8aavP7NJ89myw5AIRH9uGHfMmJA1a7ElwWhSlQCTlvu6F2TgA2LqJ2htLWWd51/lyINru95Nl93i+WG2YcYl13L24+m+LSdpqWCBQBBB42WuIhk41LpCJcOnFMBzP9zrjN/2U9M1bnzNeWJ1FP3YLG/GcHhn4VYurIFXWt4="
+   - PYTHON=python3
    - COVERITY_SCAN_PROJECT_NAME="ph4r05/trezor-crypto"
    - COVERITY_SCAN_BRANCH_PATTERN="coverity_scan"
    - COVERITY_SCAN_NOTIFICATION_EMAIL="ph4r05@gmail.com"
