@@ -23,7 +23,7 @@ env:
    - COVERITY_SCAN_PROJECT_NAME="ph4r05/trezor-crypto"
    - COVERITY_SCAN_BRANCH_PATTERN="coverity_scan"
    - COVERITY_SCAN_NOTIFICATION_EMAIL="ph4r05@gmail.com"
-   - COVERITY_SCAN_BUILD_COMMAND='bash build-coverity.sh'
+   - COVERITY_SCAN_BUILD_COMMAND='make'
 
 before_install:
   - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
