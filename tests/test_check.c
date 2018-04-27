@@ -31,8 +31,10 @@
 #include <check.h>
 #include "check_mem.h"
 
+#ifndef NO_VALGRIND
 #include <valgrind/valgrind.h>
 #include <valgrind/memcheck.h>
+#endif
 
 #include "options.h"
 
@@ -65,11 +67,15 @@
  * This is a clever trick to make Valgrind's Memcheck verify code
  * is constant-time with respect to secret data.
  */
-
+#ifndef NO_VALGRIND
 /* Call after secret data is written, before first use */
 #define   MARK_SECRET_DATA(addr, len) VALGRIND_MAKE_MEM_UNDEFINED(addr, len)
 /* Call before secret data is freed or to mark non-secret data (public keys or signatures) */
 #define UNMARK_SECRET_DATA(addr, len) VALGRIND_MAKE_MEM_DEFINED  (addr, len)
+#else
+#define   MARK_SECRET_DATA(addr, len)
+#define UNMARK_SECRET_DATA(addr, len)
+#endif
 
 #define FROMHEX_MAXLEN 512
 
