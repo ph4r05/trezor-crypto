@@ -150,7 +150,7 @@ void add256_modm(bignum256modm r, const bignum256modm x, const bignum256modm y) 
 }
 
 /* -x % m */
-void neg_modm(bignum256modm r, const bignum256modm x) {
+void neg256_modm(bignum256modm r, const bignum256modm x) {
   bignum256modm_element_t b = 0, pb;
 
   /* r = m - x */
@@ -172,7 +172,7 @@ void neg_modm(bignum256modm r, const bignum256modm x) {
 /* subtraction x-y % m */
 void sub256_modm(bignum256modm r, const bignum256modm x, const bignum256modm y) {
   bignum256modm negy;
-  neg_modm(negy, y);
+  neg256_modm(negy, y);
   add256_modm(r, x, negy);
 }
 
