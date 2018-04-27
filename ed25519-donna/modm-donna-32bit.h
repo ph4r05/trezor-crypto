@@ -38,10 +38,10 @@ void one256_modm(bignum256modm x);
 /* addition modulo m */
 void add256_modm(bignum256modm r, const bignum256modm x, const bignum256modm y);
 
-/* -x % m */
+/* -x modulo m */
 void neg256_modm(bignum256modm r, const bignum256modm x);
 
-/* subtraction x-y % m */
+/* subtraction x-y modulo m */
 void sub256_modm(bignum256modm r, const bignum256modm x, const bignum256modm y);
 
 /* multiplication modulo m */
