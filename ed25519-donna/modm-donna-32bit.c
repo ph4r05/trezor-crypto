@@ -218,8 +218,8 @@ void neg256_modm(bignum256modm r, const bignum256modm x) {
 static const uint32_t twoP[] = {
 		0x5cf5d3ed, 0x60498c68, 0x6f79cd64, 0x77be77a7, 0x40000013, 0x3fffffff, 0x3fffffff, 0x3fffffff, 0xfff};
 
-static const uint32_t fourP[] = {
-		0x9cf5d3ed, 0xa0498c67, 0xaf79cd63, 0xb7be77a6, 0x80000012, 0x7ffffffe, 0x7ffffffe, 0x7ffffffe, 0xffe};
+//static const uint32_t fourP[] = {
+//		0x9cf5d3ed, 0xa0498c67, 0xaf79cd63, 0xb7be77a6, 0x80000012, 0x7ffffffe, 0x7ffffffe, 0x7ffffffe, 0xffe};
 
 /* subtraction x-y % m */
 void sub256_modm(bignum256modm r, const bignum256modm x, const bignum256modm y) {
