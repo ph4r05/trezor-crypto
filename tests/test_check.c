@@ -3542,11 +3542,11 @@ START_TEST(test_xmr_base58)
 
 		memcpy(rawn, fromhex(raw), len);
 
-		r = xmr_base58_encode_check(tests[i].tag, rawn, len, strn, sizeof(strn));
+		r = xmr_base58_addr_encode_check(tests[i].tag, rawn, len, strn, sizeof(strn));
 		ck_assert_int_eq((size_t)r, strlen(str));
 		ck_assert_str_eq(strn, str);
 
-		r = xmr_base58_decode_check(strn, r, &tag, rawn, len);
+		r = xmr_base58_addr_decode_check(strn, r, &tag, rawn, len);
 		ck_assert_int_eq(r, len);
 		ck_assert_mem_eq(rawn, fromhex(raw), len);
 	}

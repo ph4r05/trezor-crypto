@@ -137,7 +137,7 @@ bool decode_block(const char* block, size_t size, char* res)
 }
 
 
-bool encode(char *b58, size_t *b58sz, const void *data, size_t binsz)
+bool xmr_base58_encode(char *b58, size_t *b58sz, const void *data, size_t binsz)
 {
   if (binsz==0)
     return true;
@@ -167,7 +167,7 @@ bool encode(char *b58, size_t *b58sz, const void *data, size_t binsz)
   return true;
 }
 
-bool decode(const char *b58, size_t b58sz, void *data, size_t *binsz)
+bool xmr_base58_decode(const char *b58, size_t b58sz, void *data, size_t *binsz)
 {
   if (b58sz == 0) {
     *binsz = 0;
@@ -205,7 +205,7 @@ bool decode(const char *b58, size_t b58sz, void *data, size_t *binsz)
   return true;
 }
 
-int xmr_base58_encode_check(uint64_t tag, const uint8_t *data, size_t binsz, char *b58, size_t b58sz)
+int xmr_base58_addr_encode_check(uint64_t tag, const uint8_t *data, size_t binsz, char *b58, size_t b58sz)
 {
   if (binsz > 128 || tag > 127) {  // tag varint
     return false;
@@ -218,17 +218,17 @@ int xmr_base58_encode_check(uint64_t tag, const uint8_t *data, size_t binsz, cha
   memcpy(buf + 1, data, binsz);
   hasher_Raw(HASHER_SHA3K, buf, binsz + 1, hash);
 
-  bool r = encode(b58, &b58size, buf, binsz + 1 + addr_checksum_size);
+  bool r = xmr_base58_encode(b58, &b58size, buf, binsz + 1 + addr_checksum_size);
   return (int) (!r ? 0 : b58size);
 }
 
-int xmr_base58_decode_check(const char *addr, size_t sz, uint64_t * tag, void *data, size_t datalen)
+int xmr_base58_addr_decode_check(const char *addr, size_t sz, uint64_t *tag, void *data, size_t datalen)
 {
   size_t buflen = 1 + 64 + addr_checksum_size;
   uint8_t buf[buflen];
   uint8_t hash[HASHER_DIGEST_LENGTH];
 
-  if (!decode(addr, sz, buf, &buflen)){
+  if (!xmr_base58_decode(addr, sz, buf, &buflen)){
     return 0;
   }
 
