@@ -2797,7 +2797,7 @@ START_TEST(test_xmr_base58)
 
     r = xmr_base58_addr_encode_check(tests[i].tag, rawn, len, strn, sizeof(strn));
     ck_assert_int_eq((size_t)r, strlen(str));
-    ck_assert_str_eq(strn, str);
+    ck_assert_mem_eq(strn, str, r);
 
     r = xmr_base58_addr_decode_check(strn, r, &tag, rawn, len);
     ck_assert_int_eq(r, len);
