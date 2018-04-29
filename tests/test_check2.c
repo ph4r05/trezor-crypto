@@ -2607,7 +2607,7 @@ START_TEST(test_ed25519_modl_add)
 
 	};
 
-	char buff[32];
+	unsigned char buff[32];
 	bignum256modm a={0}, b={0}, c={0};
 
 	for (size_t i = 0; i < (sizeof(tests) / sizeof(*tests)); i++) {
@@ -2642,7 +2642,7 @@ START_TEST(test_ed25519_modl_neg)
        "0000000000000000000000000000000000000000000000000000000000000000"},
   };
 
-  char buff[32];
+  unsigned char buff[32];
   bignum256modm a={0}, b={0};
 
   for (size_t i = 0; i < (sizeof(tests) / sizeof(*tests)); i++) {
@@ -2749,7 +2749,7 @@ START_TEST(test_ed25519_modl_sub)
 
   };
 
-  char buff[32];
+  unsigned char buff[32];
   bignum256modm a={0}, b={0}, c={0};
 
   for (size_t i = 0; i < (sizeof(tests) / sizeof(*tests)); i++) {
