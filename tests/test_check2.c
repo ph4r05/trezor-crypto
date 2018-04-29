@@ -53,6 +53,9 @@
 #include "rc4.h"
 #include "nem.h"
 
+#include "monero/base58.h"
+
+
 /*
  * This is a clever trick to make Valgrind's Memcheck verify code
  * is constant-time with respect to secret data.
@@ -2762,6 +2765,48 @@ START_TEST(test_ed25519_modl_sub)
 }
 END_TEST
 
+
+START_TEST(test_xmr_base58)
+{
+  static const struct {
+    uint64_t tag;
+    char * v1;
+    char * v2;
+  } tests[] = {
+      {0x12,
+          "3bec484c5d7f0246af520aab550452b5b6013733feabebd681c4a60d457b7fc12d5918e31d3c003da3c778592c07b398ad6f961a67082a75fd49394d51e69bbe",
+          "43tpGG9PKbwCpjRvNLn1jwXPpnacw2uVUcszAtgmDiVcZK4VgHwjJT9BJz1WGF9eMxSYASp8yNMkuLjeQfWqJn3CNWdWfzV"
+      },
+      {53,
+          "5a10cca900ee47a7f412cd661b29f5ab356d6a1951884593bb170b5ec8b6f2e83b1da411527d062c9fedeb2dad669f2f5585a00a88462b8c95c809a630e5734c",
+          "9vacMKaj8JJV6MnwDzh2oNVdwTLJfTDyNRiB6NzV9TT7fqvzLivH2dB8Tv7VYR3ncn8vCb3KdNMJzQWrPAF1otYJ9cPKpkr"
+      },
+  };
+
+  uint8_t rawn[512];
+  char strn[512];
+  int r;
+  uint64_t tag;
+
+  for (size_t i = 0; i < (sizeof(tests) / sizeof(*tests)); i++) {
+    const char *raw = tests[i].v1;
+    const char *str = tests[i].v2;
+    const size_t len = strlen(raw) / 2;
+
+    memcpy(rawn, fromhex(raw), len);
+
+    r = xmr_base58_encode_check(tests[i].tag, rawn, len, strn, sizeof(strn));
+    ck_assert_int_eq((size_t)r, strlen(str));
+    ck_assert_str_eq(strn, str);
+
+    r = xmr_base58_decode_check(strn, r, &tag, rawn, len);
+    ck_assert_int_eq(r, len);
+    ck_assert_mem_eq(rawn, fromhex(raw), len);
+  }
+}
+END_TEST
+
+
 dummy(){
 
 }
@@ -2776,6 +2821,10 @@ Suite *test_suite(void)
 	tcase_add_test(tc, test_ed25519_modl_add);
 	tcase_add_test(tc, test_ed25519_modl_neg);
 	tcase_add_test(tc, test_ed25519_modl_sub);
+	suite_add_tcase(s, tc);
+
+	tc = tcase_create("xmr_base58");
+	tcase_add_test(tc, test_xmr_base58);
 	suite_add_tcase(s, tc);
 
 	tc = tcase_create("base58");
