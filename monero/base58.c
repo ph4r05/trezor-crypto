@@ -56,7 +56,7 @@ static const int8_t reverse_alphabet_tbl[] = {
 
 static inline int8_t reverse_alphabet(char letter){
   const ssize_t idx = (ssize_t)(letter - alphabet[0]);
-  return (int8_t) (idx >= 0 && idx < sizeof(reverse_alphabet_tbl) ? reverse_alphabet_tbl[idx] : -1);
+  return (int8_t) (idx >= 0 && (size_t)idx < sizeof(reverse_alphabet_tbl) ? reverse_alphabet_tbl[(size_t)idx] : -1);
 }
 
 uint64_t uint_8be_to_64(const uint8_t* data, size_t size)
