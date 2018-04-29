@@ -28,8 +28,8 @@
 // 
 // Parts of this file are originally copyright (c) 2012-2013 The Cryptonote developers
 
-#ifndef __BASE58_H__
-#define __BASE58_H__
+#ifndef __XMR_BASE58_H__
+#define __XMR_BASE58_H__
 
 #include <stdint.h>
 #include <stdbool.h>

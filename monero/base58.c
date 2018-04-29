@@ -56,7 +56,7 @@ static const int8_t reverse_alphabet_tbl[] = {
 
 static inline int8_t reverse_alphabet(char letter){
   const ssize_t idx = (ssize_t)(letter - alphabet[0]);
-  return (int8_t) (idx >= 0 && idx < (ssize_t)alphabet_size ? reverse_alphabet_tbl[idx] : -1);
+  return (int8_t) (idx >= 0 && idx < sizeof(reverse_alphabet_tbl) ? reverse_alphabet_tbl[idx] : -1);
 }
 
 uint64_t uint_8be_to_64(const uint8_t* data, size_t size)
@@ -148,7 +148,7 @@ bool encode(char *b58, size_t *b58sz, const void *data, size_t binsz)
   size_t res_size = full_block_count * full_encoded_block_size + encoded_block_sizes[last_block_size];
 
   if (b58sz){
-    if (res_size < *b58sz){
+    if (res_size >= *b58sz){
       return false;
     }
     *b58sz = res_size;
@@ -215,8 +215,8 @@ int xmr_base58_encode_check(uint64_t tag, const uint8_t *data, size_t binsz, cha
   uint8_t buf[binsz + 1 + HASHER_DIGEST_LENGTH];
   uint8_t *hash = buf + binsz + 1;
   buf[0] = (uint8_t) tag;
-  memcpy(buf, data, binsz);
-  hasher_Raw(HASHER_SHA3K, data, binsz + 1, hash);
+  memcpy(buf + 1, data, binsz);
+  hasher_Raw(HASHER_SHA3K, buf, binsz + 1, hash);
 
   bool r = encode(b58, &b58size, buf, binsz + 1 + addr_checksum_size);
   return (int) (!r ? 0 : b58size);
