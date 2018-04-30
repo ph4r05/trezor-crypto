@@ -67,6 +67,7 @@ SET(SOURCES
         ed25519-donna/modm-donna-32bit.h
         monero/int-util.h
         monero/base58
+        monero/crypto
         address.c
         address.h
         base32.c
