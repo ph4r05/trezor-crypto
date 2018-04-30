@@ -132,49 +132,6 @@ void barrett_reduce256_modm(bignum256modm r, const bignum256modm q1, const bignu
 	reduce256_modm(r);
 }
 
-/* eq */
-int eq256_modm(const bignum256modm x, const bignum256modm y){
-  size_t differentbits = 0;
-  int len = bignum256modm_limb_size;
-  while (len--) {
-		differentbits |= (*x++ ^ *y++);
-	}
-  return (int) (1 & ((differentbits - 1) >> 8));
-}
-
-int iszero256_modm(const bignum256modm x){
-  size_t differentbits = 0;
-  int len = bignum256modm_limb_size;
-  while (len--) {
-		differentbits |= (*x++);
-	}
-  return (int) (1 & ((differentbits - 1) >> 8));
-}
-
-void zero256_modm(bignum256modm x){
-	x[0]=0;
-	x[1]=0;
-	x[2]=0;
-	x[3]=0;
-	x[4]=0;
-	x[5]=0;
-	x[6]=0;
-	x[7]=0;
-	x[8]=0;
-}
-
-void one256_modm(bignum256modm x){
-	x[0]=1;
-	x[1]=0;
-	x[2]=0;
-	x[3]=0;
-	x[4]=0;
-	x[5]=0;
-	x[6]=0;
-	x[7]=0;
-	x[8]=0;
-}
-
 /* addition modulo m */
 void add256_modm(bignum256modm r, const bignum256modm x, const bignum256modm y) {
 	bignum256modm_element_t c;

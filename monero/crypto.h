@@ -12,6 +12,15 @@
 /* 64bit uint to scalar value*/
 void set256_modm(bignum256modm r, uint64_t v);
 
+/* equality test on two reduced scalar values */
+int eq256_modm(const bignum256modm x, const bignum256modm y);
+
+/* comparison of two reduced scalar values */
+int cmp256_modm(const bignum256modm x, const bignum256modm y);
+
+/* scalar null check, has to be reduced */
+int iszero256_modm(const bignum256modm x);
+
 /* 8*P */
 void ge25519_mul8(ge25519 *r, const ge25519 *t);
 

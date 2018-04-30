@@ -28,15 +28,53 @@ const bignum25519 fe_fffb4 = {0x2b39186, 0x14640ed, 0x14930a7, 0x4509fa, 0x3b91b
 
 
 void set256_modm(bignum256modm r, uint64_t v) {
-  r[0] = v & 0x3fffffff; v >>= 30;
-  r[1] = v & 0x3fffffff; v >>= 30;
-  r[2] = v & 0x3fffffff;
+  r[0] = (bignum256modm_element_t) (v & 0x3fffffff); v >>= 30;
+  r[1] = (bignum256modm_element_t) (v & 0x3fffffff); v >>= 30;
+  r[2] = (bignum256modm_element_t) (v & 0x3fffffff);
   r[3] = 0;
   r[4] = 0;
   r[5] = 0;
   r[6] = 0;
   r[7] = 0;
   r[8] = 0;
+}
+
+int eq256_modm(const bignum256modm x, const bignum256modm y){
+  size_t differentbits = 0;
+  int len = bignum256modm_limb_size;
+  while (len--) {
+    differentbits |= (*x++ ^ *y++);
+  }
+  return (int) (1 & ((differentbits - 1) >> 8));
+}
+
+int cmp256_modm(const bignum256modm x, const bignum256modm y){
+  int len = 2*bignum256modm_limb_size;
+  uint32_t a_gt = 0;
+  uint32_t b_gt = 0;
+
+  // 16B chunks
+  while (len--) {
+    const uint32_t ln = (const uint32_t) len;
+    const uint32_t a = (x[ln>>1] >> 16*(ln & 1)) & 0xffff;
+    const uint32_t b = (y[ln>>1] >> 16*(ln & 1)) & 0xffff;
+
+    const uint32_t limb_a_gt = ((b - a) >> 16) & 1;
+    const uint32_t limb_b_gt = ((a - b) >> 16) & 1;
+    a_gt |= limb_a_gt & ~b_gt;
+    b_gt |= limb_b_gt & ~a_gt;
+  }
+
+  return a_gt - b_gt;
+}
+
+int iszero256_modm(const bignum256modm x){
+  size_t differentbits = 0;
+  int len = bignum256modm_limb_size;
+  while (len--) {
+    differentbits |= (*x++);
+  }
+  return (int) (1 & ((differentbits - 1) >> 8));
 }
 
 void ge25519_mul8(ge25519 *r, const ge25519 *t) {

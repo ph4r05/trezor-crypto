@@ -28,13 +28,6 @@ void reduce256_modm(bignum256modm r);
 */
 void barrett_reduce256_modm(bignum256modm r, const bignum256modm q1, const bignum256modm r1);
 
-/* eq */
-int eq256_modm(const bignum256modm x, const bignum256modm y);
-int iszero256_modm(const bignum256modm x);
-
-void zero256_modm(bignum256modm x);
-void one256_modm(bignum256modm x);
-
 /* addition modulo m */
 void add256_modm(bignum256modm r, const bignum256modm x, const bignum256modm y);
 
