@@ -54,6 +54,7 @@
 #include "nem.h"
 
 #include "monero/base58.h"
+#include "monero/crypto.h"
 
 
 /*
@@ -2806,9 +2807,32 @@ START_TEST(test_xmr_base58)
 }
 END_TEST
 
+START_TEST(test_xmr_hash_to_scalar)
+{
+	bignum256modm a1;
+	unsigned char out[32];
+	char * xx = "259ef2aba8feb473cf39058a0fe30b9ff6d245b42b6826687ebd6b63128aff6405";
+	char * exp = "9907925b254e12162609fc0dfd0fef2aa4d605b0d10e6507cac253dd31a3ec06";
+	xmr_hash_to_scalar(fromhex(xx), 33, a1);
+	contract256_modm(out, a1);
+	ck_assert_mem_eq(out, fromhex(exp), 32);
+}
+END_TEST
 
-dummy(){
+START_TEST(test_xmr_hash_to_ec)
+{
+	ge25519 p1;
+	unsigned char out[32];
+	char * yy = "42f6835bf83114a1f5f6076fe79bdfa0bd67c74b88f127d54572d3910dd09201";
+	char * exp = "54863a0464c008acc99cffb179bc6cf34eb1bbdf6c29f7a070a7c6376ae30ab5";
+	xmr_hash_to_ec(fromhex(yy), 32, &p1);
+	ge25519_pack(out, &p1);
+	ck_assert_mem_eq(out, fromhex(exp), 32);
+}
+END_TEST
 
+void dummy(){
+	
 }
 
 // define test suite and cases
@@ -2825,6 +2849,11 @@ Suite *test_suite(void)
 
 	tc = tcase_create("xmr_base58");
 	tcase_add_test(tc, test_xmr_base58);
+	suite_add_tcase(s, tc);
+
+	tc = tcase_create("xmr_crypto");
+	tcase_add_test(tc, test_xmr_hash_to_scalar);
+	tcase_add_test(tc, test_xmr_hash_to_ec);
 	suite_add_tcase(s, tc);
 
 	tc = tcase_create("base58");
