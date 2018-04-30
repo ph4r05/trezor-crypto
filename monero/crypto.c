@@ -35,6 +35,12 @@ const bignum25519 ALIGN(16) fe_fffb3 = {
 const bignum25519 ALIGN(16) fe_fffb4 = {
     0x2b39186, 0x14640ed, 0x14930a7, 0x4509fa, 0x3b91bf0, 0xf7432e, 0x7a443f, 0x17f24d8, 0x31067d, 0x690fcc}; /* sqrt(sqrt(-1) * A * (A + 2)) */
 
+const ge25519 ALIGN(16) xmr_h = {
+    {0x1861ec7, 0x1ceac77, 0x2f11626, 0x1f261d3, 0x346107c, 0x6d8c4a, 0x254201d, 0x1675c09, 0x1301c3f, 0x211d73},
+    {0x326feb4, 0x12e30cc, 0xcf54b4, 0x1117305, 0x318f5d5, 0x6cf754, 0x2e578a1, 0x1daf058, 0x34430a1, 0x4410e9},
+    {0xfde4d2, 0x774049, 0x22ca951, 0x5aec2b, 0x7a36a5, 0x1394f13, 0x3c5385c, 0x1adb924, 0x2b6c581, 0xa55fa4},
+    {0x24517f7, 0x5ee936, 0x3acf5d9, 0x14b08aa, 0x3363738, 0x1051745, 0x360601e, 0xf3f2c9, 0x1ead2cd, 0x1d3e3df}
+};
 
 void set256_modm(bignum256modm r, uint64_t v) {
   r[0] = (bignum256modm_element_t) (v & 0x3fffffff); v >>= 30;
@@ -227,7 +233,18 @@ void curve25519_expand_reduce(bignum25519 out, const unsigned char in[32]) {
   out[9] &= reduce_mask_25;
 }
 
-void curve25519_fromfe_frombytes_vartime(ge25519 *r, const unsigned char *s){
+void ge25519_copy(ge25519 *dst, const ge25519 *src){
+  curve25519_copy(dst->x, src->x);
+  curve25519_copy(dst->y, src->y);
+  curve25519_copy(dst->z, src->z);
+  curve25519_copy(dst->t, src->t);
+}
+
+void ge25519_set_xmr_h(ge25519 *r){
+  ge25519_copy(r, &xmr_h);
+}
+
+void ge25519_fromfe_frombytes_vartime(ge25519 *r, const unsigned char *s){
   bignum25519 u, v, w, x, y, z;
   unsigned char sign;
 
@@ -320,7 +337,7 @@ void xmr_hash_to_ec(const void *data, size_t length, ge25519 *P){
   uint8_t hash[HASHER_DIGEST_LENGTH];
   hasher_Raw(HASHER_SHA3K, data, length, hash);
 
-  curve25519_fromfe_frombytes_vartime(&point2, hash);
+  ge25519_fromfe_frombytes_vartime(&point2, hash);
   ge25519_mul8(P, &point2);
 }
 

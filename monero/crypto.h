@@ -9,6 +9,8 @@
 #include <ed25519-donna/ed25519-donna.h>
 #include <ed25519-donna/modm-donna-32bit.h>
 
+extern const ge25519 ALIGN(16) xmr_h;
+
 /* 64bit uint to scalar value*/
 void set256_modm(bignum256modm r, uint64_t v);
 
@@ -36,11 +38,20 @@ int curve25519_isnonzero(const bignum25519 f);
 /* Zmod(2^255-19) from byte array to bignum25519 expansion with modular reduction */
 void curve25519_expand_reduce(bignum25519 out, const unsigned char in[32]);
 
+/* copies one point to another */
+void ge25519_copy(ge25519 *dst, const ge25519 *src);
+
+/* sets H point to r*/
+void ge25519_set_xmr_h(ge25519 *r);
+
 /* H_s(buffer) */
 void xmr_hash_to_scalar(const void *data, size_t length, bignum256modm r);
 
 /* H_p(buffer) */
 void xmr_hash_to_ec(const void *data, size_t length, ge25519 *P);
 
+// TODO: varint serialization to buffer, simple one
+// TODO: derivation to scalar
+// TODO: sc_check, point check on curve when expanding.
 
 #endif //TREZOR_XMR_CRYPTO_H
