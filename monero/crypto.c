@@ -93,8 +93,8 @@ int iszero256_modm(const bignum256modm x){
 }
 
 void ge25519_mul8(ge25519 *r, const ge25519 *t) {
-  ge25519_double(r, t);
-  ge25519_double(r, r);
+  ge25519_double_partial(r, t);
+  ge25519_double_partial(r, r);
   ge25519_double(r, r);
 }
 
