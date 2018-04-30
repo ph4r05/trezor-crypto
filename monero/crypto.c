@@ -240,6 +240,10 @@ void ge25519_copy(ge25519 *dst, const ge25519 *src){
   curve25519_copy(dst->t, src->t);
 }
 
+void ge25519_set_base(ge25519 *r){
+  ge25519_copy(r, &ge25519_basepoint);
+}
+
 void ge25519_set_xmr_h(ge25519 *r){
   ge25519_copy(r, &xmr_h);
 }

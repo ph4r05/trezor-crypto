@@ -41,7 +41,10 @@ void curve25519_expand_reduce(bignum25519 out, const unsigned char in[32]);
 /* copies one point to another */
 void ge25519_copy(ge25519 *dst, const ge25519 *src);
 
-/* sets H point to r*/
+/* sets B point to r */
+void ge25519_set_base(ge25519 *r);
+
+/* sets H point to r */
 void ge25519_set_xmr_h(ge25519 *r);
 
 /* H_s(buffer) */
