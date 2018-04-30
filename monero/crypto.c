@@ -27,10 +27,16 @@ const bignum25519 fe_fffb3 = {0xcfd387, 0x1209e3a, 0x3bad4fc, 0x18ad34d, 0x2ff6c
 const bignum25519 fe_fffb4 = {0x2b39186, 0x14640ed, 0x14930a7, 0x4509fa, 0x3b91bf0, 0xf7432e, 0x7a443f, 0x17f24d8, 0x31067d, 0x690fcc}; /* sqrt(sqrt(-1) * A * (A + 2)) */
 
 
-void xmr_hash_to_scalar(const void *data, size_t length, bignum256modm r){
-  uint8_t hash[HASHER_DIGEST_LENGTH];
-  hasher_Raw(HASHER_SHA3K, data, length, hash);
-  expand256_modm(r, hash, HASHER_DIGEST_LENGTH);
+void set256_modm(bignum256modm r, uint64_t v) {
+  r[0] = v & 0x3fffffff; v >>= 30;
+  r[1] = v & 0x3fffffff; v >>= 30;
+  r[2] = v & 0x3fffffff;
+  r[3] = 0;
+  r[4] = 0;
+  r[5] = 0;
+  r[6] = 0;
+  r[7] = 0;
+  r[8] = 0;
 }
 
 void ge25519_mul8(ge25519 *r, const ge25519 *t) {
@@ -39,17 +45,17 @@ void ge25519_mul8(ge25519 *r, const ge25519 *t) {
   ge25519_double(r, r);
 }
 
-void curve25519_set(bignum25519 r, int x){
-   r[0]= (uint32_t) x;
-   r[1]=0;
-   r[2]=0;
-   r[3]=0;
-   r[4]=0;
-   r[5]=0;
-   r[6]=0;
-   r[7]=0;
-   r[8]=0;
-   r[9]=0;
+void curve25519_set(bignum25519 r, uint32_t x){
+   r[0] = x & reduce_mask_26; x >>= 26;
+   r[1] = x & reduce_mask_25;
+   r[2] = 0;
+   r[3] = 0;
+   r[4] = 0;
+   r[5] = 0;
+   r[6] = 0;
+   r[7] = 0;
+   r[8] = 0;
+   r[9] = 0;
 }
 
 int curve25519_isnegative(const bignum25519 f) {
@@ -230,10 +236,12 @@ setsign:
   curve25519_sub_reduce(r->y, z, w);
   curve25519_mul(r->x, r->x, r->z);
 
-  //rt = ((rx * ry % q) * inv(rz)) % q
-//  curve25519_mul(x, r->x, r->y);
-//  curve25519_recip(z, r->z);
-//  curve25519_mul(r->t, x, z);
+  // Partial form, saving from T coord computation .
+  // Later is mul8 discarding T anyway.
+  // rt = ((rx * ry % q) * inv(rz)) % q
+  // curve25519_mul(x, r->x, r->y);
+  // curve25519_recip(z, r->z);
+  // curve25519_mul(r->t, x, z);
 
 #if !defined(NDEBUG)
   {
@@ -252,6 +260,12 @@ setsign:
     assert(!curve25519_isnonzero(check_v));
   }
 #endif
+}
+
+void xmr_hash_to_scalar(const void *data, size_t length, bignum256modm r){
+  uint8_t hash[HASHER_DIGEST_LENGTH];
+  hasher_Raw(HASHER_SHA3K, data, length, hash);
+  expand256_modm(r, hash, HASHER_DIGEST_LENGTH);
 }
 
 void xmr_hash_to_ec(const void *data, size_t length, ge25519 *P){
