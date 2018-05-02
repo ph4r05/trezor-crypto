@@ -12,3 +12,6 @@ tests/test_check
 tests/libtrezor-crypto.so
 *.os
 *.pyc
+cmake-build-*/
+.idea/
+
