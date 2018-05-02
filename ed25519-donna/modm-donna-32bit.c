@@ -169,7 +169,6 @@ void neg256_modm(bignum256modm r, const bignum256modm x) {
 	reduce256_modm(r);
 }
 
-
 /* consts for subtraction, > p */
 /* Emilia Kasper trick, https://www.imperialviolet.org/2010/12/04/ecc.html */
 static const uint32_t twoP[] = {
