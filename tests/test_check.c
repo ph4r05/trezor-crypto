@@ -3479,14 +3479,11 @@ START_TEST(test_ed25519_modl_sub)
 		 "8859d1d1deee0767a4ff1b72a3e0d0327573c69bbff5fc07cfa61414e6ef3b0e"
 		},
 
-<<<<<<< HEAD
-=======
 		{"9d91e26dbe7a14fdca9f5b20d13e828dc8c1ffe03fe90136a6bba507436ce500",
 		 "9ca406705ccce65eb8cbf63706d3df09fcc67216c0dc3990270731aacbb2e607",
 		 "eec0d15a7c1140f6e8705c8ba9658198ccfa8cca7f0cc8a57eb4745d77b9fe08"
 		},
 
->>>>>>> tmaster
 		{"eef80ad5a9aad8b35b84f6a4eb3a7e2b222f403d455d8cdf40ad27e4cd5ae90a",
 		 "0000000000000000000000000000000000000000000000000000000000000000",
 		 "eef80ad5a9aad8b35b84f6a4eb3a7e2b222f403d455d8cdf40ad27e4cd5ae90a"
@@ -3576,7 +3573,6 @@ START_TEST(test_ed25519_modl_sub)
 }
 END_TEST
 
-<<<<<<< HEAD
 START_TEST(test_xmr_base58)
 {
 	static const struct {
@@ -3617,8 +3613,6 @@ START_TEST(test_xmr_base58)
 }
 END_TEST
 
-=======
->>>>>>> tmaster
 static void test_bip32_ecdh_init_node(HDNode *node, const char *seed_str, const char *curve_name) {
 	hdnode_from_seed((const uint8_t *)seed_str, strlen(seed_str), curve_name, node);
 	hdnode_fill_public_key(node);
@@ -4850,13 +4844,10 @@ Suite *test_suite(void)
 	tcase_add_test(tc, test_ed25519_modl_sub);
 	suite_add_tcase(s, tc);
 
-<<<<<<< HEAD
 	tc = tcase_create("xmr_base58");
 	tcase_add_test(tc, test_xmr_base58);
 	suite_add_tcase(s, tc);
 
-=======
->>>>>>> tmaster
 	tc = tcase_create("script");
 	tcase_add_test(tc, test_output_script);
 	suite_add_tcase(s, tc);
