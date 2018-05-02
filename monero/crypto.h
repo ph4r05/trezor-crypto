@@ -7,7 +7,6 @@
 
 #include <stddef.h>
 #include <ed25519-donna/ed25519-donna.h>
-#include <ed25519-donna/modm-donna-32bit.h>
 
 extern const ge25519 ALIGN(16) xmr_h;
 
