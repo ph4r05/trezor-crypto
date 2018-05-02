@@ -72,7 +72,6 @@ void xmr_hash_to_ec(const void *data, size_t length, ge25519 *P);
 
 // TODO: varint serialization to buffer, simple one
 // TODO: derivation to scalar
-// TODO: sc_check, point check on curve when expanding.
-// TODO: check point on curve
+// TODO: sc_check
 
 #endif //TREZOR_XMR_CRYPTO_H
