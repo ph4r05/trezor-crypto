@@ -2823,11 +2823,22 @@ START_TEST(test_xmr_hash_to_ec)
 {
 	ge25519 p1;
 	unsigned char out[32];
-	char * yy = "42f6835bf83114a1f5f6076fe79bdfa0bd67c74b88f127d54572d3910dd09201";
-	char * exp = "54863a0464c008acc99cffb179bc6cf34eb1bbdf6c29f7a070a7c6376ae30ab5";
-	xmr_hash_to_ec(fromhex(yy), 32, &p1);
-	ge25519_pack(out, &p1);
-	ck_assert_mem_eq(out, fromhex(exp), 32);
+	char tests[][2][65] = {
+			{"", "d6d7d783ab18e1be65586adb7902a4175b737ef0b902875e1d1d5c5cf0478c0b"},
+			{"00", "8e2fecb36320bc4e192e10ef54afc7c83fbeb0c38b7debd4fea51301f0bd4f3d"},
+			{"000102", "73b233e2e75d81b9657a857e38e7ab2bc3600e5c56622b9fe4b976ff312220fa"},
+			{"000102030405", "bebe3c84092c0f7a92704cafb16562cc45c47f45e84baec8d4bba3559d1c1808"},
+			{"000102030406", "525567a6a40a94f2d916bc1efea234bbd3b9162403ec2faba871a90f8d0d487e"},
+			{"000102030407", "99b1be2a92cbd22b24b48fb7a9daadd4d13a56915c4f6ed696f271ad5bdbc149"},
+			{"42f6835bf83114a1f5f6076fe79bdfa0bd67c74b88f127d54572d3910dd09201", "54863a0464c008acc99cffb179bc6cf34eb1bbdf6c29f7a070a7c6376ae30ab5"},
+			{"44caa1c26187afe8dacc5d91cb8a51282334d9308a818fe4d3607275e2a61f05", "001000a93e0e6937b4feaf079e418a028ca85459aa39ac3871b94076f88ca608"},
+	};
+
+	for (size_t i = 0; i < (sizeof(tests) / sizeof(*tests)); i++) {
+		xmr_hash_to_ec(fromhex(tests[i][0]), strlen(tests[i][0])/2, &p1);
+		ge25519_pack(out, &p1);
+		ck_assert_mem_eq(out, fromhex(tests[i][1]), 32);
+	}
 }
 END_TEST
 
