@@ -330,6 +330,22 @@ setsign:
 #endif
 }
 
+void xmr_fast_hash(const void *data, size_t length, uint8_t * hash){
+  hasher_Raw(HASHER_SHA3K, data, length, hash);
+}
+
+void xmr_hasher_init(Hasher * hasher){
+  hasher_Init(hasher, HASHER_SHA3K);
+}
+
+void xmr_hasher_update(Hasher * hasher, const void *data, size_t length){
+  hasher_Update(hasher, data, length);
+}
+
+void xmr_hasher_final(Hasher * hasher, uint8_t * hash){
+  hasher_Final(hasher, hash);
+}
+
 void xmr_hash_to_scalar(const void *data, size_t length, bignum256modm r){
   uint8_t hash[HASHER_DIGEST_LENGTH];
   hasher_Raw(HASHER_SHA3K, data, length, hash);

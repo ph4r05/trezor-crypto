@@ -7,6 +7,7 @@
 
 #include <stddef.h>
 #include <ed25519-donna/ed25519-donna.h>
+#include <hasher.h>
 
 extern const ge25519 ALIGN(16) xmr_h;
 
@@ -45,6 +46,14 @@ void ge25519_set_base(ge25519 *r);
 
 /* sets H point to r */
 void ge25519_set_xmr_h(ge25519 *r);
+
+/* cn_fast_hash */
+void xmr_fast_hash(const void *data, size_t length, uint8_t * hash);
+
+/* incremental hashing wrappers */
+void xmr_hasher_init(Hasher * hasher);
+void xmr_hasher_update(Hasher * hasher, const void *data, size_t length);
+void xmr_hasher_final(Hasher * hasher, uint8_t * hash);
 
 /* H_s(buffer) */
 void xmr_hash_to_scalar(const void *data, size_t length, bignum256modm r);
