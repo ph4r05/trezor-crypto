@@ -60,7 +60,7 @@ int eq256_modm(const bignum256modm x, const bignum256modm y){
   while (len--) {
     differentbits |= (*x++ ^ *y++);
   }
-  return (int) (1 & ((differentbits - 1) >> 8));
+  return (int) (1 & ((differentbits - 1) >> bignum256modm_bits_per_limb));
 }
 
 int cmp256_modm(const bignum256modm x, const bignum256modm y){
@@ -89,7 +89,7 @@ int iszero256_modm(const bignum256modm x){
   while (len--) {
     differentbits |= (*x++);
   }
-  return (int) (1 & ((differentbits - 1) >> 8));
+  return (int) (1 & ((differentbits - 1) >> bignum256modm_bits_per_limb));
 }
 
 void mulsub256_modm(bignum256modm r, const bignum256modm a, const bignum256modm b, const bignum256modm c){
