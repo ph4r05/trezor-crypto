@@ -2808,29 +2808,38 @@ START_TEST(test_xmr_base58)
 END_TEST
 
 START_TEST(test_xmr_check_point)
-	{
-		static const struct {
-			char * p;
-			bool on;
-		} tests[] = {
-				{"001000a93e0e6937b4feaf079e418a028ca85459aa39ac3871b94076f88ca608", true},
-				{"54863a0464c008acc99cffb179bc6cf34eb1bbdf6c29f7a070a7c6376ae30ab5", true},
-				{"bebe3c84092c0f7a92704cafb16562cc45c47f45e84baec8d4bba3559d1c1808", true},
-				{"00000000000000c60073ec000000000000ff0000000000000000000000000080", false},
-				{"00000000000000004e0000000000000000000000000000000000000000000000", false},
-				{"0000008b0000000000000000b200000000000000000000000000000000000080", false},
-				{"a0953eebe2f676256c37af4f6f84f32d397aaf3b73606e96c5ddfcecbb1ceec8", false},
-				{"a82cd837efee505ec8425769ea925bee869ec3c78a57708c64c2ef2bd6ad3b88", false},
-				{"031c56cfc99758f6f025630e77c6dea0b853c3ab0bf6cf8c8dab03d1a4618178", false},
-		};
+{
+	static const struct {
+		char * p;
+		bool on;
+	} tests[] = {
+			{"001000a93e0e6937b4feaf079e418a028ca85459aa39ac3871b94076f88ca608", true},
+			{"54863a0464c008acc99cffb179bc6cf34eb1bbdf6c29f7a070a7c6376ae30ab5", true},
+			{"bebe3c84092c0f7a92704cafb16562cc45c47f45e84baec8d4bba3559d1c1808", true},
+			{"00000000000000c60073ec000000000000ff0000000000000000000000000080", false},
+			{"00000000000000004e0000000000000000000000000000000000000000000000", false},
+			{"0000008b0000000000000000b200000000000000000000000000000000000080", false},
+			{"a0953eebe2f676256c37af4f6f84f32d397aaf3b73606e96c5ddfcecbb1ceec8", false},
+			{"a82cd837efee505ec8425769ea925bee869ec3c78a57708c64c2ef2bd6ad3b88", false},
+			{"031c56cfc99758f6f025630e77c6dea0b853c3ab0bf6cf8c8dab03d1a4618178", false},
+	};
 
-		ge25519 tmp={0};
-		for (size_t i = 0; i < (sizeof(tests) / sizeof(*tests)); i++) {
-			int res = ge25519_unpack_negative_vartime(&tmp, fromhex(tests[i].p));
-			ck_assert_int_eq(ge25519_check(&tmp), tests[i].on);
-			ck_assert_int_eq(res, tests[i].on);
-		}
+	ge25519 tmp={0};
+	for (size_t i = 0; i < (sizeof(tests) / sizeof(*tests)); i++) {
+		int res = ge25519_unpack_negative_vartime(&tmp, fromhex(tests[i].p));
+		ck_assert_int_eq(ge25519_check(&tmp), tests[i].on);
+		ck_assert_int_eq(res, tests[i].on);
 	}
+}
+END_TEST
+
+START_TEST(test_xmr_h)
+{
+	char * H = "8b655970153799af2aeadc9ff1add0ea6c7251d54154cfa92c173a0dd39c1f94";
+	uint8_t buff[32] = {0};
+	ge25519_pack(buff, &xmr_h);
+	ck_assert_mem_eq(buff, fromhex(H), 32);
+}
 END_TEST
 
 START_TEST(test_xmr_hash_to_scalar)
@@ -2901,6 +2910,7 @@ Suite *test_suite(void)
 
 	tc = tcase_create("xmr_crypto");
 	tcase_add_test(tc, test_xmr_check_point);
+	tcase_add_test(tc, test_xmr_h);
 	tcase_add_test(tc, test_xmr_hash_to_scalar);
 	tcase_add_test(tc, test_xmr_hash_to_ec);
 	suite_add_tcase(s, tc);
