@@ -7,6 +7,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include <serialize.h>
 #include <hasher.h>
 
 static const uint32_t reduce_mask_25 = (1 << 25) - 1;
@@ -411,3 +412,9 @@ void xmr_hash_to_ec(const void *data, size_t length, ge25519 *P){
   ge25519_mul8(P, &point2);
 }
 
+void xmr_derivation_to_scalar(bignum256modm s, const ge25519 * p, unsigned output_index){
+  uint8_t buff[32 + 8];
+  ge25519_pack(buff, p);
+  int written = xmr_write_varint(buff + 32, 8, output_index);
+  xmr_hash_to_scalar(buff, 32u + written, s);
+}

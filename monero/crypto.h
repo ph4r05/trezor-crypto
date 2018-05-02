@@ -70,8 +70,10 @@ void xmr_hash_to_scalar(const void *data, size_t length, bignum256modm r);
 /* H_p(buffer) */
 void xmr_hash_to_ec(const void *data, size_t length, ge25519 *P);
 
-// TODO: varint serialization to buffer, simple one
-// TODO: derivation to scalar
+/* derivation to scalar value */
+void xmr_derivation_to_scalar(bignum256modm s, const ge25519 * p, unsigned output_index);
+
+// TODO: generate_key_derivation, derive_public_key, derive_secret_key, gen_c, add_keys1, add_keys2
 // TODO: sc_check
 
 #endif //TREZOR_XMR_CRYPTO_H
