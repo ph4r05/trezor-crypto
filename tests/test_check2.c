@@ -2811,11 +2811,22 @@ START_TEST(test_xmr_hash_to_scalar)
 {
 	bignum256modm a1;
 	unsigned char out[32];
-	char * xx = "259ef2aba8feb473cf39058a0fe30b9ff6d245b42b6826687ebd6b63128aff6405";
-	char * exp = "9907925b254e12162609fc0dfd0fef2aa4d605b0d10e6507cac253dd31a3ec06";
-	xmr_hash_to_scalar(fromhex(xx), 33, a1);
-	contract256_modm(out, a1);
-	ck_assert_mem_eq(out, fromhex(exp), 32);
+	char tests[][2][65] = {
+			{"", "4a078e76cd41a3d3b534b83dc6f2ea2de500b653ca82273b7bfad8045d85a400"},
+			{"00", "5497c9b6a7059553835f85118dc089d66512f7b477d66591ff96a9e064bcc90a"},
+			{"000102", "5727ca206dbafa2e099b022ed528f5bdf7874e3ec09c8f012159dfeeaab2b106"},
+			{"000102030405", "7740cf04577c107153a50b3abe44859f5245d3d545c6cbf5052e80258ae80607"},
+			{"000102030406", "ad6bbffaceb8020543ac82bcadb9d090b553ca1260035eae982d669ff6494f02"},
+			{"000102030407", "d2e116e9576ee5a29011c8fcb41259f99e6933b1d3bb660d0a9ac54e12e5cd06"},
+			{"259ef2aba8feb473cf39058a0fe30b9ff6d245b42b6826687ebd6b63128aff64", "3d6d3727dc50bca39e6ccfc9c12950eef5845e4278565d17f95559513a244d02"},
+			{"44caa1c26187afe8dacc5d91cb8a51282334d9308a818fe4d3607275e2a61f05", "aecc45c83f0408c96c70f8273e94f930edfbd3cd98896a0e57b1b5929fa5ff0b"},
+	};
+
+	for (size_t i = 0; i < (sizeof(tests) / sizeof(*tests)); i++) {
+		xmr_hash_to_scalar(fromhex(tests[i][0]), strlen(tests[i][0])/2, a1);
+		contract256_modm(out, a1);
+		ck_assert_mem_eq(out, fromhex(tests[i][1]), 32);
+	}
 }
 END_TEST
 
