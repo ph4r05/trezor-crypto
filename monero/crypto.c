@@ -132,6 +132,20 @@ int curve25519_isnonzero(const bignum25519 f) {
                   s[18] | s[19] | s[20] | s[21] | s[22] | s[23] | s[24] | s[25] | s[26] |
                   s[27] | s[28] | s[29] | s[30] | s[31]) - 1) >> 8) + 1) & 0x1;
 }
+
+void curve25519_reduce(bignum25519 out, const bignum25519 in) {
+  uint32_t c;
+  out[0] = in[0]    ; c = (out[0] >> 26); out[0] &= reduce_mask_26;
+  out[1] = in[1] + c; c = (out[1] >> 25); out[1] &= reduce_mask_25;
+  out[2] = in[2] + c; c = (out[2] >> 26); out[2] &= reduce_mask_26;
+  out[3] = in[3] + c; c = (out[3] >> 25); out[3] &= reduce_mask_25;
+  out[4] = in[4] + c; c = (out[4] >> 26); out[4] &= reduce_mask_26;
+  out[5] = in[5] + c; c = (out[5] >> 25); out[5] &= reduce_mask_25;
+  out[6] = in[6] + c; c = (out[6] >> 26); out[6] &= reduce_mask_26;
+  out[7] = in[7] + c; c = (out[7] >> 25); out[7] &= reduce_mask_25;
+  out[8] = in[8] + c; c = (out[8] >> 26); out[8] &= reduce_mask_26;
+  out[9] = in[9] + c; c = (out[9] >> 25); out[9] &= reduce_mask_25;
+  out[0] += 19 * c;
 }
 
 static void curve25519_divpowm1(bignum25519 r, const bignum25519 u, const bignum25519 v) {
@@ -239,6 +253,34 @@ void curve25519_expand_reduce(bignum25519 out, const unsigned char in[32]) {
   out[9] = ((                       x7) >>  6); // & reduce_mask_25; /* ignore the top bit */
   out[0] += 19 * (out[9] >> 25);
   out[9] &= reduce_mask_25;
+}
+
+int ge25519_check(const ge25519 *r){
+  /* return (z % q != 0 and
+             x * y % q == z * t % q and
+            (y * y - x * x - z * z - ed25519.d * t * t) % q == 0)
+   */
+
+  bignum25519 z={0}, lhs={0}, rhs={0}, tmp={0}, res={0};
+  curve25519_reduce(z, r->z);
+
+  curve25519_mul(lhs, r->x, r->y);
+  curve25519_mul(rhs, r->z, r->t);
+  curve25519_sub_reduce(lhs, lhs, rhs);
+
+  curve25519_square(res, r->y);
+  curve25519_square(tmp, r->x);
+  curve25519_sub_reduce(res, res, tmp);
+  curve25519_square(tmp, r->z);
+  curve25519_sub_reduce(res, res, tmp);
+  curve25519_square(tmp, r->t);
+  curve25519_mul(tmp, tmp, ge25519_ecd);
+  curve25519_sub_reduce(res, res, tmp);
+
+  const int c1 = curve25519_isnonzero(z);
+  const int c2 = curve25519_isnonzero(lhs);
+  const int c3 = curve25519_isnonzero(res);
+  return c1 & (c2^0x1) & (c3^0x1);
 }
 
 void ge25519_copy(ge25519 *dst, const ge25519 *src){
