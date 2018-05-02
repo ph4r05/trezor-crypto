@@ -256,7 +256,7 @@ void ge25519_set_xmr_h(ge25519 *r){
 }
 
 void ge25519_fromfe_frombytes_vartime(ge25519 *r, const unsigned char *s){
-  bignum25519 u, v, w, x, y, z;
+  bignum25519 u={0}, v={0}, w={0}, x={0}, y={0}, z={0};
   unsigned char sign;
 
   curve25519_expand_reduce(u, s);
@@ -320,7 +320,7 @@ setsign:
 
 #if !defined(NDEBUG)
   {
-    bignum25519 check_x, check_y, check_iz, check_v;
+    bignum25519 check_x={0}, check_y={0}, check_iz={0}, check_v={0};
     curve25519_recip(check_iz, r->z);
     curve25519_mul(check_x, r->x, check_iz);
     curve25519_mul(check_y, r->y, check_iz);

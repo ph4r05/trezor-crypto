@@ -38,8 +38,14 @@ int curve25519_isnegative(const bignum25519 f);
 /* constant time Zmod(2^255-19) non-zero test */
 int curve25519_isnonzero(const bignum25519 f);
 
+/* reduce Zmod(2^255-19) */
+void curve25519_reduce(bignum25519 r, const bignum25519 in);
+
 /* Zmod(2^255-19) from byte array to bignum25519 expansion with modular reduction */
 void curve25519_expand_reduce(bignum25519 out, const unsigned char in[32]);
+
+/* check if r is on curve */
+int ge25519_check(const ge25519 *r);
 
 /* copies one point to another */
 void ge25519_copy(ge25519 *dst, const ge25519 *src);
