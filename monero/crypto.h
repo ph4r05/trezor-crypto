@@ -23,6 +23,9 @@ int cmp256_modm(const bignum256modm x, const bignum256modm y);
 /* scalar null check, has to be reduced */
 int iszero256_modm(const bignum256modm x);
 
+/* (aa - bb * cc) % l */
+void mulsub256_modm(bignum256modm r, const bignum256modm a, const bignum256modm b, const bignum256modm c);
+
 /* 8*P */
 void ge25519_mul8(ge25519 *r, const ge25519 *t);
 

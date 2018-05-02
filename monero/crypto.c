@@ -92,6 +92,13 @@ int iszero256_modm(const bignum256modm x){
   return (int) (1 & ((differentbits - 1) >> 8));
 }
 
+void mulsub256_modm(bignum256modm r, const bignum256modm a, const bignum256modm b, const bignum256modm c){
+  //(aa - bb * cc) % l
+  bignum256modm t={0};
+  mul256_modm(t, b, c);
+  sub256_modm(r, a, t);
+}
+
 void ge25519_mul8(ge25519 *r, const ge25519 *t) {
   ge25519_double_partial(r, t);
   ge25519_double_partial(r, r);
