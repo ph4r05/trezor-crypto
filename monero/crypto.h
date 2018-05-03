@@ -26,9 +26,6 @@ int iszero256_modm(const bignum256modm x);
 /* (aa - bb * cc) % l */
 void mulsub256_modm(bignum256modm r, const bignum256modm a, const bignum256modm b, const bignum256modm c);
 
-/* 8*P */
-void ge25519_mul8(ge25519 *r, const ge25519 *t);
-
 /* uint32_t to Zmod(2^255-19) */
 void curve25519_set(bignum25519 r, uint32_t x);
 
@@ -53,6 +50,15 @@ void ge25519_copy(ge25519 *dst, const ge25519 *src);
 /* sets B point to r */
 void ge25519_set_base(ge25519 *r);
 
+/* 8*P */
+void ge25519_mul8(ge25519 *r, const ge25519 *t);
+
+/* -P */
+void ge25519_neg_partial(ge25519 *r);
+
+/* -P */
+void ge25519_neg_full(ge25519 *r);
+
 /* sets H point to r */
 void ge25519_set_xmr_h(ge25519 *r);
 
@@ -71,9 +77,27 @@ void xmr_hash_to_scalar(const void *data, size_t length, bignum256modm r);
 void xmr_hash_to_ec(const void *data, size_t length, ge25519 *P);
 
 /* derivation to scalar value */
-void xmr_derivation_to_scalar(bignum256modm s, const ge25519 * p, unsigned output_index);
+void xmr_derivation_to_scalar(bignum256modm s, const ge25519 * p, uint32_t output_index);
 
-// TODO: generate_key_derivation, derive_public_key, derive_secret_key, gen_c, add_keys1, add_keys2
+/* derivation */
+void xmr_generate_key_derivation(ge25519 * r, const ge25519 * A, const bignum256modm b);
+
+/* H_s(derivation || varint(output_index)) + base */
+void xmr_derive_private_key(bignum256modm s, const ge25519 * deriv, uint32_t idx, const bignum256modm base);
+
+/* H_s(derivation || varint(output_index))G + base */
+void xmr_derive_public_key(ge25519 * r, const ge25519 * deriv, uint32_t idx, const ge25519 * base);
+
+/* Generates Pedersen commitment C = aG + bH */
+void xmr_gen_c(ge25519 * r, const bignum256modm a, uint64_t amount);
+
+/* aG + bB, G is basepoint */
+void xmr_add_keys1(ge25519 * r, const bignum256modm a, const bignum256modm b, const ge25519 * p);
+
+/* aA + bB */
+void xmr_add_keys2(ge25519 * r, const bignum256modm a, const ge25519 * A, const bignum256modm b, const ge25519 * B);
+
+
 // TODO: sc_check
 
 #endif //TREZOR_XMR_CRYPTO_H

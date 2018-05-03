@@ -100,12 +100,6 @@ void mulsub256_modm(bignum256modm r, const bignum256modm a, const bignum256modm 
   sub256_modm(r, a, t);
 }
 
-void ge25519_mul8(ge25519 *r, const ge25519 *t) {
-  ge25519_double_partial(r, t);
-  ge25519_double_partial(r, r);
-  ge25519_double(r, r);
-}
-
 void curve25519_set(bignum25519 r, uint32_t x){
    r[0] = x & reduce_mask_26; x >>= 26;
    r[1] = x & reduce_mask_25;
@@ -295,6 +289,21 @@ void ge25519_set_base(ge25519 *r){
   ge25519_copy(r, &ge25519_basepoint);
 }
 
+void ge25519_mul8(ge25519 *r, const ge25519 *t) {
+  ge25519_double_partial(r, t);
+  ge25519_double_partial(r, r);
+  ge25519_double(r, r);
+}
+
+void ge25519_neg_partial(ge25519 *r){
+  curve25519_neg(r->x, r->x);
+}
+
+void ge25519_neg_full(ge25519 *r){
+  curve25519_neg(r->x, r->x);
+  curve25519_neg(r->t, r->t);
+}
+
 void ge25519_set_xmr_h(ge25519 *r){
   ge25519_copy(r, &xmr_h);
 }
@@ -412,9 +421,78 @@ void xmr_hash_to_ec(const void *data, size_t length, ge25519 *P){
   ge25519_mul8(P, &point2);
 }
 
-void xmr_derivation_to_scalar(bignum256modm s, const ge25519 * p, unsigned output_index){
+void xmr_derivation_to_scalar(bignum256modm s, const ge25519 * p, uint32_t output_index){
   uint8_t buff[32 + 8];
   ge25519_pack(buff, p);
   int written = xmr_write_varint(buff + 32, 8, output_index);
   xmr_hash_to_scalar(buff, 32u + written, s);
 }
+
+void xmr_generate_key_derivation(ge25519 * r, const ge25519 * A, const bignum256modm b){
+  ge25519 bA;
+  ge25519_scalarmult(&bA, A, b);
+  ge25519_mul8(r, &bA);
+}
+
+void xmr_derive_private_key(bignum256modm s, const ge25519 * deriv, uint32_t idx, const bignum256modm base){
+  xmr_derivation_to_scalar(s, deriv, idx);
+  add256_modm(s, s, base);
+}
+
+void xmr_derive_public_key(ge25519 * r, const ge25519 * deriv, uint32_t idx, const ge25519 * base){
+  bignum256modm s={0};
+  ge25519 p2;
+  ge25519_pniels Bp;
+  ge25519_p1p1 p1;
+
+  xmr_derivation_to_scalar(s, deriv, idx);
+  ge25519_scalarmult_base_niels(&p2, ge25519_niels_base_multiples, s);
+
+  ge25519_full_to_pniels(&Bp, base);
+  ge25519_pnielsadd_p1p1(&p1, &p2, &Bp, 0);
+  ge25519_p1p1_to_full(r, &p1);
+}
+
+void xmr_gen_c(ge25519 * r, const bignum256modm a, uint64_t amount){
+  // C = aG + bH
+  ge25519 A, B;
+  bignum256modm b={0};
+  ge25519_pniels Bp;
+  ge25519_p1p1 p1;
+
+  ge25519_scalarmult_base_niels(&A, ge25519_niels_base_multiples, a);
+
+  set256_modm(b, amount);
+  ge25519_scalarmult(&B, &xmr_h, b);
+
+  ge25519_full_to_pniels(&Bp, &B);
+  ge25519_pnielsadd_p1p1(&p1, &A, &Bp, 0);
+  ge25519_p1p1_to_full(r, &p1);
+}
+
+void xmr_add_keys1(ge25519 * r, const bignum256modm a, const bignum256modm b, const ge25519 * p){
+  // aG + bB, G is basepoint
+  ge25519 A, B;
+  ge25519_pniels Bp;
+  ge25519_p1p1 p1;
+  ge25519_scalarmult_base_niels(&A, ge25519_niels_base_multiples, a);
+  ge25519_scalarmult(&B, p, b);
+
+  ge25519_full_to_pniels(&Bp, &B);
+  ge25519_pnielsadd_p1p1(&p1, &A, &Bp, 0);
+  ge25519_p1p1_to_full(r, &p1);
+}
+
+void xmr_add_keys2(ge25519 * r, const bignum256modm a, const ge25519 * A, const bignum256modm b, const ge25519 * B){
+  // aA + bB
+  ge25519 aA, bB;
+  ge25519_pniels bBn;
+  ge25519_p1p1 p1;
+  ge25519_scalarmult(&bB, A, a);
+  ge25519_scalarmult(&aA, B, b);
+
+  ge25519_full_to_pniels(&bBn, &bB);
+  ge25519_pnielsadd_p1p1(&p1, &aA, &bBn, 0);
+  ge25519_p1p1_to_full(r, &p1);
+}
+
