@@ -48,6 +48,9 @@ void curve25519_expand_reduce(bignum25519 out, const unsigned char in[32]);
 /* check if r is on curve */
 int ge25519_check(const ge25519 *r);
 
+/* a == b */
+int ge25519_eq(const ge25519 *a, const ge25519 *b);
+
 /* copies one point to another */
 void ge25519_copy(ge25519 *dst, const ge25519 *src);
 

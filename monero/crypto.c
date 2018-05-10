@@ -296,6 +296,26 @@ int ge25519_check(const ge25519 *r){
   return c1 & (c2^0x1) & (c3^0x1);
 }
 
+int ge25519_eq(const ge25519 *a, const ge25519 *b){
+  int eq = 1;
+  bignum25519 t1={0}, t2={0};
+
+  eq &= ge25519_check(a);
+  eq &= ge25519_check(b);
+
+  curve25519_mul(t1, a->x, b->z);
+  curve25519_mul(t2, b->x, a->z);
+  curve25519_sub_reduce(t1, t1, t2);
+  eq &= curve25519_isnonzero(t1) ^ 1;
+
+  curve25519_mul(t1, a->y, b->z);
+  curve25519_mul(t2, b->y, a->z);
+  curve25519_sub_reduce(t1, t1, t2);
+  eq &= curve25519_isnonzero(t1) ^ 1;
+
+  return eq;
+}
+
 void ge25519_copy(ge25519 *dst, const ge25519 *src){
   curve25519_copy(dst->x, src->x);
   curve25519_copy(dst->y, src->y);
