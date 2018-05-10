@@ -53,8 +53,7 @@
 #include "rc4.h"
 #include "nem.h"
 
-#include "monero/base58.h"
-#include "monero/crypto.h"
+#include "monero/monero.h"
 
 
 /*

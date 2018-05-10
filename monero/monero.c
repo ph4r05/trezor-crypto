@@ -1,0 +1,140 @@
+//
+// Created by Dusan Klinec on 10/05/2018.
+//
+
+#include "monero.h"
+#include "int-util.h"
+
+
+const ge25519 ALIGN(16) xmr_h = {
+    {0x1861ec7, 0x1ceac77, 0x2f11626, 0x1f261d3, 0x346107c, 0x06d8c4a, 0x254201d, 0x1675c09, 0x1301c3f, 0x0211d73},
+    {0x326feb4, 0x12e30cc, 0x0cf54b4, 0x1117305, 0x318f5d5, 0x06cf754, 0x2e578a1, 0x1daf058, 0x34430a1, 0x04410e9},
+    {0x0fde4d2, 0x0774049, 0x22ca951, 0x05aec2b, 0x07a36a5, 0x1394f13, 0x3c5385c, 0x1adb924, 0x2b6c581, 0x0a55fa4},
+    {0x24517f7, 0x05ee936, 0x3acf5d9, 0x14b08aa, 0x3363738, 0x1051745, 0x360601e, 0x0f3f2c9, 0x1ead2cd, 0x1d3e3df}
+};
+
+
+void ge25519_set_xmr_h(ge25519 *r){
+  ge25519_copy(r, &xmr_h);
+}
+
+
+void xmr_fast_hash(const void *data, size_t length, uint8_t * hash){
+  hasher_Raw(HASHER_SHA3K, data, length, hash);
+}
+
+void xmr_hasher_init(Hasher * hasher){
+  hasher_Init(hasher, HASHER_SHA3K);
+}
+
+void xmr_hasher_update(Hasher * hasher, const void *data, size_t length){
+  hasher_Update(hasher, data, length);
+}
+
+void xmr_hasher_final(Hasher * hasher, uint8_t * hash){
+  hasher_Final(hasher, hash);
+}
+
+void xmr_hash_to_scalar(const void *data, size_t length, bignum256modm r){
+  uint8_t hash[HASHER_DIGEST_LENGTH];
+  hasher_Raw(HASHER_SHA3K, data, length, hash);
+  expand256_modm(r, hash, HASHER_DIGEST_LENGTH);
+}
+
+void xmr_hash_to_ec(const void *data, size_t length, ge25519 *P){
+  ge25519 point2;
+  uint8_t hash[HASHER_DIGEST_LENGTH];
+  hasher_Raw(HASHER_SHA3K, data, length, hash);
+
+  ge25519_fromfe_frombytes_vartime(&point2, hash);
+  ge25519_mul8(P, &point2);
+}
+
+void xmr_derivation_to_scalar(bignum256modm s, const ge25519 * p, uint32_t output_index){
+  uint8_t buff[32 + 8];
+  ge25519_pack(buff, p);
+  int written = xmr_write_varint(buff + 32, 8, output_index);
+  xmr_hash_to_scalar(buff, 32u + written, s);
+}
+
+void xmr_generate_key_derivation(ge25519 * r, const ge25519 * A, const bignum256modm b){
+  ge25519 bA;
+  ge25519_scalarmult(&bA, A, b);
+  ge25519_mul8(r, &bA);
+}
+
+void xmr_derive_private_key(bignum256modm s, const ge25519 * deriv, uint32_t idx, const bignum256modm base){
+  xmr_derivation_to_scalar(s, deriv, idx);
+  add256_modm(s, s, base);
+}
+
+void xmr_derive_public_key(ge25519 * r, const ge25519 * deriv, uint32_t idx, const ge25519 * base){
+  bignum256modm s={0};
+  ge25519 p2;
+  ge25519_pniels Bp;
+  ge25519_p1p1 p1;
+
+  xmr_derivation_to_scalar(s, deriv, idx);
+  ge25519_scalarmult_base_niels(&p2, ge25519_niels_base_multiples, s);
+
+  ge25519_full_to_pniels(&Bp, base);
+  ge25519_pnielsadd_p1p1(&p1, &p2, &Bp, 0);
+  ge25519_p1p1_to_full(r, &p1);
+}
+
+void xmr_gen_c(ge25519 * r, const bignum256modm a, uint64_t amount){
+  // C = aG + bH
+  ge25519 A, B;
+  bignum256modm b={0};
+  ge25519_pniels Bp;
+  ge25519_p1p1 p1;
+
+  ge25519_scalarmult_base_niels(&A, ge25519_niels_base_multiples, a);
+
+  set256_modm(b, amount);
+  ge25519_scalarmult(&B, &xmr_h, b);
+
+  ge25519_full_to_pniels(&Bp, &B);
+  ge25519_pnielsadd_p1p1(&p1, &A, &Bp, 0);
+  ge25519_p1p1_to_full(r, &p1);
+}
+
+void xmr_add_keys1(ge25519 * r, const bignum256modm a, const bignum256modm b, const ge25519 * p){
+  // aG + bB, G is basepoint
+  ge25519 A, B;
+  ge25519_pniels Bp;
+  ge25519_p1p1 p1;
+  ge25519_scalarmult_base_niels(&A, ge25519_niels_base_multiples, a);
+  ge25519_scalarmult(&B, p, b);
+
+  ge25519_full_to_pniels(&Bp, &B);
+  ge25519_pnielsadd_p1p1(&p1, &A, &Bp, 0);
+  ge25519_p1p1_to_full(r, &p1);
+}
+
+void xmr_add_keys2(ge25519 * r, const bignum256modm a, const ge25519 * A, const bignum256modm b, const ge25519 * B){
+  // aA + bB
+  ge25519 aA, bB;
+  ge25519_pniels bBn;
+  ge25519_p1p1 p1;
+  ge25519_scalarmult(&bB, A, a);
+  ge25519_scalarmult(&aA, B, b);
+
+  ge25519_full_to_pniels(&bBn, &bB);
+  ge25519_pnielsadd_p1p1(&p1, &aA, &bBn, 0);
+  ge25519_p1p1_to_full(r, &p1);
+}
+
+void xmr_get_subaddress_secret_key(bignum256modm a, uint32_t major, uint32_t minor, bignum256modm m){
+  const char prefix[] = "SubAddr";
+  char data[sizeof(prefix) + sizeof(bignum256modm) + 2 * sizeof(uint32_t)];
+  memcpy(data, prefix, sizeof(prefix));
+  memcpy(data + sizeof(prefix), &a, sizeof(bignum256modm));
+  uint32_t idx = SWAP32LE(major);
+  memcpy(data + sizeof(prefix) + sizeof(bignum256modm), &idx, sizeof(uint32_t));
+  idx = SWAP32LE(minor);
+  memcpy(data + sizeof(prefix) + sizeof(bignum256modm) + sizeof(uint32_t), &idx, sizeof(uint32_t));
+
+  xmr_hash_to_scalar(data, sizeof(data), m);
+}
+

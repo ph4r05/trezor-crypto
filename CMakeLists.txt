@@ -69,6 +69,7 @@ SET(SOURCES
         monero/base58
         monero/serialize
         monero/crypto
+        monero/monero
         address.c
         address.h
         base32.c
