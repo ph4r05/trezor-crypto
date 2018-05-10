@@ -2611,7 +2611,8 @@ START_TEST(test_ed25519_modl_add)
 	};
 
 	unsigned char buff[32];
-	bignum256modm a={0}, b={0}, c={0};
+	bignum256modm a={0}, b={0}, c={0}, d={0};
+	set256_modm(d, 1);
 
 	for (size_t i = 0; i < (sizeof(tests) / sizeof(*tests)); i++) {
 		expand256_modm(a, fromhex(tests[i][0]), 32);
@@ -2619,6 +2620,10 @@ START_TEST(test_ed25519_modl_add)
 		add256_modm(c, a, b);
 		contract256_modm(buff, c);
 		ck_assert_mem_eq(buff, fromhex(tests[i][2]), 32);
+		expand256_modm(a, fromhex(tests[i][2]), 32);
+		ck_assert_int_eq(eq256_modm(a, c), 1);
+		add256_modm(c, c, d);
+		ck_assert_int_eq(eq256_modm(a, c), 0);
 	}
 }
 END_TEST
@@ -2835,9 +2840,31 @@ END_TEST
 START_TEST(test_xmr_h)
 {
 	char * H = "8b655970153799af2aeadc9ff1add0ea6c7251d54154cfa92c173a0dd39c1f94";
+	ge25519 H2, Z;
+	ge25519_p1p1 P_11;
+	ge25519_pniels P_ni;
 	uint8_t buff[32] = {0};
+	uint8_t buff2[32] = {0};
+
 	ge25519_pack(buff, &xmr_h);
 	ck_assert_mem_eq(buff, fromhex(H), 32);
+
+	int res = ge25519_unpack_vartime(&H2, buff);
+	ck_assert_int_eq(res, 1);
+	ck_assert_int_eq(ge25519_eq(&xmr_h, &xmr_h), 1);
+	ck_assert_int_eq(ge25519_eq(&H2, &xmr_h), 1);
+
+	res = ge25519_unpack_negative_vartime(&H2, buff);
+	ck_assert_int_eq(res, 1);
+	ck_assert_int_eq(ge25519_eq(&H2, &xmr_h), 0);
+	ge25519_neg_full(&H2);
+	ck_assert_int_eq(ge25519_eq(&H2, &xmr_h), 1);
+
+	ge25519_full_to_pniels(&P_ni, &xmr_h);
+	ge25519_pnielsadd_p1p1(&P_11, &H2, &P_ni, 1);
+	ge25519_p1p1_to_full(&H2, &P_11);
+	ge25519_set_neutral(&Z);
+	ck_assert_int_eq(ge25519_eq(&Z, &H2), 1);
 }
 END_TEST
 
