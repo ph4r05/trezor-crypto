@@ -87,6 +87,30 @@ int iszero256_modm(const bignum256modm x){
   return (int) (1 & ((differentbits - 1) >> bignum256modm_bits_per_limb));
 }
 
+void copy256_modm(bignum256modm r, const bignum256modm x){
+  r[0] = x[0];
+  r[1] = x[1];
+  r[2] = x[2];
+  r[3] = x[3];
+  r[4] = x[4];
+  r[5] = x[5];
+  r[6] = x[6];
+  r[7] = x[7];
+  r[8] = x[8];
+}
+
+int check256_modm(const bignum256modm x){
+  int ok = 1;
+  bignum256modm t={0};
+
+  ok &= iszero256_modm(x) ^ 1;
+  copy256_modm(t, x);
+  reduce256_modm(t);
+  ok &= eq256_modm(t, x);
+
+  return ok;
+}
+
 void mulsub256_modm(bignum256modm r, const bignum256modm a, const bignum256modm b, const bignum256modm c){
   //(aa - bb * cc) % l
   bignum256modm t={0};

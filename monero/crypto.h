@@ -21,6 +21,12 @@ int cmp256_modm(const bignum256modm x, const bignum256modm y);
 /* scalar null check, has to be reduced */
 int iszero256_modm(const bignum256modm x);
 
+/* simple copy, no reduction */
+void copy256_modm(bignum256modm r, const bignum256modm x);
+
+/* check if nonzero && same after reduction */
+int check256_modm(const bignum256modm x);
+
 /* (aa - bb * cc) % l */
 void mulsub256_modm(bignum256modm r, const bignum256modm a, const bignum256modm b, const bignum256modm c);
 
