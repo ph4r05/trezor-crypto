@@ -5,6 +5,7 @@
 #include "xmr.h"
 #include "int-util.h"
 #include "serialize.h"
+#include "rand.h"
 
 
 const ge25519 ALIGN(16) xmr_h = {
@@ -19,6 +20,11 @@ void ge25519_set_xmr_h(ge25519 *r){
   ge25519_copy(r, &xmr_h);
 }
 
+void xmr_random_scalar(bignum256modm m){
+  unsigned char buff[32];
+  random_buffer(buff, sizeof(buff));
+  expand256_modm(m, buff, sizeof(buff));
+}
 
 void xmr_fast_hash(const void *data, size_t length, uint8_t * hash){
   hasher_Raw(HASHER_SHA3K, data, length, hash);

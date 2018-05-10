@@ -14,8 +14,16 @@ typedef struct xmr_key {
   unsigned char bytes[32];
 } xmr_key_t;
 
+typedef struct xmr_ctkey {
+  xmr_key_t dest;
+  xmr_key_t mask;
+} xmr_ctkey_t;
+
 /* sets H point to r */
 void ge25519_set_xmr_h(ge25519 *r);
+
+/* random scalar value */
+void xmr_random_scalar(bignum256modm m);
 
 /* cn_fast_hash */
 void xmr_fast_hash(const void *data, size_t length, uint8_t * hash);
