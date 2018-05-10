@@ -66,8 +66,15 @@ void ge25519_neg_partial(ge25519 *r);
 /* -P */
 void ge25519_neg_full(ge25519 *r);
 
-/* point from bytes */
+/* Simple addition */
+void ge25519_add(ge25519 *r, const ge25519 *a, const ge25519 *b, unsigned char signbit);
+
+/* point from bytes, used in H_p() */
 void ge25519_fromfe_frombytes_vartime(ge25519 *r, const unsigned char *s);
+
+/* point from bytes */
+int ge25519_unpack_vartime(ge25519 *r, const unsigned char *s);
+
 
 // TODO: sc_check
 

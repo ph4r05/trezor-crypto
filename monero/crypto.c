@@ -342,6 +342,15 @@ void ge25519_neg_full(ge25519 *r){
   curve25519_neg(r->t, r->t);
 }
 
+void ge25519_add(ge25519 *r, const ge25519 *a, const ge25519 *b, unsigned char signbit) {
+  ge25519_pniels P_ni;
+  ge25519_p1p1 P_11;
+
+  ge25519_full_to_pniels(&P_ni, b);
+  ge25519_pnielsadd_p1p1(&P_11, a, &P_ni, signbit);
+  ge25519_p1p1_to_full(r, &P_11);
+}
+
 void ge25519_fromfe_frombytes_vartime(ge25519 *r, const unsigned char *s){
   bignum25519 u={0}, v={0}, w={0}, x={0}, y={0}, z={0};
   unsigned char sign;
@@ -422,5 +431,11 @@ setsign:
     assert(!curve25519_isnonzero(check_v));
   }
 #endif
+}
+
+int ge25519_unpack_vartime(ge25519 *r, const unsigned char *s){
+  int res = ge25519_unpack_negative_vartime(r, s);
+  ge25519_neg_full(r);
+  return res;
 }
 
