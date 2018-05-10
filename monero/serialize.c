@@ -31,7 +31,7 @@ int xmr_write_varint(uint8_t * buff, size_t buff_size, uint64_t num){
 }
 
 int xmr_read_varint(uint8_t * buff, size_t buff_size, uint64_t *val) {
-  int read = 0;
+  unsigned read = 0;
   int finished_ok = 0;
 
   for (int shift = 0; read < buff_size; shift += 7, ++read) {
