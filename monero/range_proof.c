@@ -82,7 +82,7 @@ void xmr_gen_range_sig(xmr_range_sig_t * sig, xmr_key_t * C, xmr_key_t * mask, x
 
   // Second pass, s0, s1
   for(unsigned ii=0; ii<n; ++ii){
-    if (BB(ii) != 1){
+    if (BB(ii) == 0){
       mulsub256_modm(si, alpha[ii], ai[ii], ee);
       contract256_modm(sig->asig.s0[ii].bytes, si);
 
@@ -101,7 +101,7 @@ void xmr_gen_range_sig(xmr_range_sig_t * sig, xmr_key_t * C, xmr_key_t * mask, x
     ge25519_double(&C_h, &C_h);  // c_H = crypto.scalarmult(c_H, 2)
   }
 
-  ge25519_pack(C->bytes, &C_tmp);
+  ge25519_pack(C->bytes, &C_acc);
   contract256_modm(mask->bytes, a);
   contract256_modm(sig->asig.ee.bytes, ee);
 #undef BB
