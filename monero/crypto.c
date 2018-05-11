@@ -468,16 +468,16 @@ void ge25519_add_vartime(ge25519 *r, const ge25519 *p, const ge25519 *q, unsigne
 
   curve25519_sub_reduce(g, p->y, p->x);
   curve25519_sub_reduce(h, Q.y, Q.x);
-  curve25519_mul(a, g, h); curve25519_reduce(a, a);
+  curve25519_mul(a, g, h);
 
   curve25519_add_reduce(g, p->y, p->x);
   curve25519_add_reduce(h, Q.y, Q.x);
-  curve25519_mul(b, g, h); curve25519_reduce(b, b);
+  curve25519_mul(b, g, h);
 
-  curve25519_mul(c, p->t, Q.t); curve25519_reduce(c, c);
-  curve25519_mul(c, c, ge25519_ec2d); curve25519_reduce(c, c);
+  curve25519_mul(c, p->t, Q.t);
+  curve25519_mul(c, c, ge25519_ec2d);
 
-  curve25519_mul(d, p->z, Q.z); curve25519_reduce(d, d);
+  curve25519_mul(d, p->z, Q.z);
   curve25519_add_reduce(d, d, d);
 
   curve25519_sub_reduce(e, b, a);
@@ -485,10 +485,10 @@ void ge25519_add_vartime(ge25519 *r, const ge25519 *p, const ge25519 *q, unsigne
   curve25519_add_reduce(g, d, c);
   curve25519_add_reduce(h, b, a);
 
-  curve25519_mul(r->x, e, f); curve25519_reduce(r->x, r->x);
-  curve25519_mul(r->y, g, h); curve25519_reduce(r->y, r->y);
-  curve25519_mul(r->t, e, h); curve25519_reduce(r->t, r->t);
-  curve25519_mul(r->z, f, g); curve25519_reduce(r->z, r->z);
+  curve25519_mul(r->x, e, f);
+  curve25519_mul(r->y, g, h);
+  curve25519_mul(r->t, e, h);
+  curve25519_mul(r->z, f, g);
 }
 
 void debug_sc(const bignum256modm r){
