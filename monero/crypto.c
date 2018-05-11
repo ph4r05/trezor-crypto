@@ -21,8 +21,8 @@ const bignum25519 ALIGN(16) fe_sqrtm1 = {
     0x20ea0b0, 0x186c9d2, 0x08f189d, 0x035697f, 0x0bd0c60, 0x1fbd7a7, 0x2804c9e, 0x1e16569, 0x004fc1d, 0x0ae0c92}; /* sqrt(-1) */
 const bignum25519 ALIGN(16) fe_d2 = {
     0x2b2f159, 0x1a6e509, 0x22add7a, 0x0d4141d, 0x0038052, 0x0f3d130, 0x3407977, 0x19ce331, 0x1c56dff, 0x0901b67}; /* 2 * d */
-/* A = 2 * (1 - d) / (1 + d) = 486662 */
 
+/* A = 2 * (1 - d) / (1 + d) = 486662 */
 const bignum25519 ALIGN(16) fe_ma2 = {
     0x33de3c9, 0x1fff236, 0x3ffffff, 0x1ffffff, 0x3ffffff, 0x1ffffff, 0x3ffffff, 0x1ffffff, 0x3ffffff, 0x1ffffff}; /* -A^2 */
 const bignum25519 ALIGN(16) fe_ma = {
