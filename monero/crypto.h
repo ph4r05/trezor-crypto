@@ -66,6 +66,12 @@ void ge25519_neg_partial(ge25519 *r);
 /* -P */
 void ge25519_neg_full(ge25519 *r);
 
+/* reduce all coords */
+void ge25519_reduce(ge25519 *r, const ge25519 *t);
+
+/* normalizes coords. (x, y, 1, x*y) */
+void ge25519_norm(ge25519 *r, const ge25519 * t);
+
 /* Simple addition */
 void ge25519_add(ge25519 *r, const ge25519 *a, const ge25519 *b, unsigned char signbit);
 
@@ -75,7 +81,5 @@ void ge25519_fromfe_frombytes_vartime(ge25519 *r, const unsigned char *s);
 /* point from bytes */
 int ge25519_unpack_vartime(ge25519 *r, const unsigned char *s);
 
-
-// TODO: sc_check
 
 #endif //TREZOR_XMR_CRYPTO_H
