@@ -61,7 +61,7 @@ void xmr_derivation_to_scalar(bignum256modm s, const ge25519 * p, uint32_t outpu
   uint8_t buff[32 + 8];
   ge25519_pack(buff, p);
   int written = xmr_write_varint(buff + 32, 8, output_index);
-  xmr_hash_to_scalar(buff, 32u + written, s);
+  xmr_hash_to_scalar(s, buff, 32u + written);
 }
 
 void xmr_generate_key_derivation(ge25519 * r, const ge25519 * A, const bignum256modm b){
@@ -138,6 +138,6 @@ void xmr_get_subaddress_secret_key(bignum256modm r, uint32_t major, uint32_t min
   idx = SWAP32LE(minor);
   memcpy(data + sizeof(prefix) + sizeof(bignum256modm) + sizeof(uint32_t), &idx, sizeof(uint32_t));
 
-  xmr_hash_to_scalar(data, sizeof(data), r);
+  xmr_hash_to_scalar(r, data, sizeof(data));
 }
 

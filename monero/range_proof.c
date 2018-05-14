@@ -8,7 +8,7 @@
 static void xmr_hash_ge25519_to_scalar(bignum256modm r, const ge25519 *p){
   unsigned char buff[32];
   ge25519_pack(buff, p);
-  xmr_hash_to_scalar(buff, sizeof(buff), r);
+  xmr_hash_to_scalar(r, buff, sizeof(buff));
 }
 
 void xmr_gen_range_sig(xmr_range_sig_t * sig, xmr_key_t * C, xmr_key_t * mask, xmr_amount amount, bignum256modm * last_mask){
