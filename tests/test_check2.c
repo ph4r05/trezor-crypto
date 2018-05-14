@@ -2884,7 +2884,7 @@ START_TEST(test_xmr_hash_to_scalar)
 	};
 
 	for (size_t i = 0; i < (sizeof(tests) / sizeof(*tests)); i++) {
-		xmr_hash_to_scalar(fromhex(tests[i][0]), strlen(tests[i][0])/2, a1);
+		xmr_hash_to_scalar(a1, fromhex(tests[i][0]), strlen(tests[i][0])/2);
 		contract256_modm(out, a1);
 		ck_assert_mem_eq(out, fromhex(tests[i][1]), 32);
 	}
@@ -2907,7 +2907,7 @@ START_TEST(test_xmr_hash_to_ec)
 	};
 
 	for (size_t i = 0; i < (sizeof(tests) / sizeof(*tests)); i++) {
-		xmr_hash_to_ec(fromhex(tests[i][0]), strlen(tests[i][0])/2, &p1);
+		xmr_hash_to_ec(&p1, fromhex(tests[i][0]), strlen(tests[i][0])/2);
 		ge25519_pack(out, &p1);
 		ck_assert_mem_eq(out, fromhex(tests[i][1]), 32);
 	}

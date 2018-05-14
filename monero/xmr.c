@@ -26,7 +26,7 @@ void xmr_random_scalar(bignum256modm m){
   expand256_modm(m, buff, sizeof(buff));
 }
 
-void xmr_fast_hash(const void *data, size_t length, uint8_t * hash){
+void xmr_fast_hash(uint8_t * hash, const void *data, size_t length){
   hasher_Raw(HASHER_SHA3K, data, length, hash);
 }
 
@@ -42,13 +42,13 @@ void xmr_hasher_final(Hasher * hasher, uint8_t * hash){
   hasher_Final(hasher, hash);
 }
 
-void xmr_hash_to_scalar(const void *data, size_t length, bignum256modm r){
+void xmr_hash_to_scalar(bignum256modm r, const void *data, size_t length){
   uint8_t hash[HASHER_DIGEST_LENGTH];
   hasher_Raw(HASHER_SHA3K, data, length, hash);
   expand256_modm(r, hash, HASHER_DIGEST_LENGTH);
 }
 
-void xmr_hash_to_ec(const void *data, size_t length, ge25519 *P){
+void xmr_hash_to_ec(ge25519 *P, const void *data, size_t length){
   ge25519 point2;
   uint8_t hash[HASHER_DIGEST_LENGTH];
   hasher_Raw(HASHER_SHA3K, data, length, hash);
@@ -128,16 +128,16 @@ void xmr_add_keys2(ge25519 * r, const bignum256modm a, const ge25519 * A, const 
   ge25519_p1p1_to_full(r, &p1);
 }
 
-void xmr_get_subaddress_secret_key(bignum256modm a, uint32_t major, uint32_t minor, bignum256modm m){
+void xmr_get_subaddress_secret_key(bignum256modm r, uint32_t major, uint32_t minor, const bignum256modm m){
   const char prefix[] = "SubAddr";
   char data[sizeof(prefix) + sizeof(bignum256modm) + 2 * sizeof(uint32_t)];
   memcpy(data, prefix, sizeof(prefix));
-  memcpy(data + sizeof(prefix), &a, sizeof(bignum256modm));
+  memcpy(data + sizeof(prefix), &m, sizeof(bignum256modm));
   uint32_t idx = SWAP32LE(major);
   memcpy(data + sizeof(prefix) + sizeof(bignum256modm), &idx, sizeof(uint32_t));
   idx = SWAP32LE(minor);
   memcpy(data + sizeof(prefix) + sizeof(bignum256modm) + sizeof(uint32_t), &idx, sizeof(uint32_t));
 
-  xmr_hash_to_scalar(data, sizeof(data), m);
+  xmr_hash_to_scalar(data, sizeof(data), r);
 }
 

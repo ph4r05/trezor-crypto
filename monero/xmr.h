@@ -26,7 +26,7 @@ void ge25519_set_xmr_h(ge25519 *r);
 void xmr_random_scalar(bignum256modm m);
 
 /* cn_fast_hash */
-void xmr_fast_hash(const void *data, size_t length, uint8_t * hash);
+void xmr_fast_hash(uint8_t * hash, const void *data, size_t length);
 
 /* incremental hashing wrappers */
 void xmr_hasher_init(Hasher * hasher);
@@ -34,10 +34,10 @@ void xmr_hasher_update(Hasher * hasher, const void *data, size_t length);
 void xmr_hasher_final(Hasher * hasher, uint8_t * hash);
 
 /* H_s(buffer) */
-void xmr_hash_to_scalar(const void *data, size_t length, bignum256modm r);
+void xmr_hash_to_scalar(bignum256modm r, const void *data, size_t length);
 
 /* H_p(buffer) */
-void xmr_hash_to_ec(const void *data, size_t length, ge25519 *P);
+void xmr_hash_to_ec(ge25519 *P, const void *data, size_t length);
 
 /* derivation to scalar value */
 void xmr_derivation_to_scalar(bignum256modm s, const ge25519 * p, uint32_t output_index);
@@ -61,7 +61,7 @@ void xmr_add_keys1(ge25519 * r, const bignum256modm a, const bignum256modm b, co
 void xmr_add_keys2(ge25519 * r, const bignum256modm a, const ge25519 * A, const bignum256modm b, const ge25519 * B);
 
 /* subaddress secret */
-void xmr_get_subaddress_secret_key(bignum256modm a, uint32_t major, uint32_t minor, bignum256modm m);
+void xmr_get_subaddress_secret_key(bignum256modm r, uint32_t major, uint32_t minor, const bignum256modm m);
 
 
 #endif //TREZOR_CRYPTO_XMR_H
