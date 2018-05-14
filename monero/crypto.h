@@ -33,6 +33,15 @@ void mulsub256_modm(bignum256modm r, const bignum256modm a, const bignum256modm 
 /* uint32_t to Zmod(2^255-19) */
 void curve25519_set(bignum25519 r, uint32_t x);
 
+/* set d */
+void curve25519_set_d(bignum25519 r);
+
+/* set 2d */
+void curve25519_set_2d(bignum25519 r);
+
+/* set sqrt(-1) */
+void curve25519_set_sqrtneg1(bignum25519 r);
+
 /* constant time Zmod(2^255-19) negative test */
 int curve25519_isnegative(const bignum25519 f);
 

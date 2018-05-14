@@ -131,6 +131,18 @@ void curve25519_set(bignum25519 r, uint32_t x){
    r[9] = 0;
 }
 
+void curve25519_set_d(bignum25519 r){
+  curve25519_copy(r, ge25519_ecd);
+}
+
+void curve25519_set_2d(bignum25519 r){
+  curve25519_copy(r, ge25519_ec2d);
+}
+
+void curve25519_set_sqrtneg1(bignum25519 r){
+  curve25519_copy(r, ge25519_sqrtneg1);
+}
+
 int curve25519_isnegative(const bignum25519 f) {
   unsigned char s[32];
   curve25519_contract(s, f);
