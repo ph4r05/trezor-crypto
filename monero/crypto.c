@@ -49,6 +49,16 @@ void set256_modm(bignum256modm r, uint64_t v) {
   r[8] = 0;
 }
 
+int get256_modm(uint64_t * v, const bignum256modm r){
+  *v = 0;
+
+  bignum256modm_element_t c = 0;
+  c  = r[0];  *v +=  (uint64_t)c & 0x3fffffff;        c >>= 30; // 30
+  c  = r[1];  *v += ((uint64_t)c & 0x3fffffff) << 30; c >>= 30; // 60
+  c  = r[2];  *v += ((uint64_t)c & 0xf)        << 60; c >>= 4;  // 64 bits
+  return c == 0;
+}
+
 int eq256_modm(const bignum256modm x, const bignum256modm y){
   size_t differentbits = 0;
   int len = bignum256modm_limb_size;

@@ -9,8 +9,11 @@
 #include <ed25519-donna/ed25519-donna.h>
 #include <hasher.h>
 
-/* 64bit uint to scalar value*/
+/* 64bit uint to scalar value */
 void set256_modm(bignum256modm r, uint64_t v);
+
+/* scalar value to 64bit uint */
+int get256_modm(uint64_t * v, const bignum256modm r);
 
 /* equality test on two reduced scalar values */
 int eq256_modm(const bignum256modm x, const bignum256modm y);
