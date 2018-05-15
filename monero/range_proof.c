@@ -12,7 +12,7 @@ static void xmr_hash_ge25519_to_scalar(bignum256modm r, const ge25519 *p){
 }
 
 void xmr_gen_range_sig(xmr_range_sig_t * sig, xmr_key_t * C, xmr_key_t * mask, xmr_amount amount, bignum256modm * last_mask){
-  const int n = XMR_ATOMS;
+  const unsigned n = XMR_ATOMS;
   bignum256modm a={0};
   bignum256modm ai[64];
   bignum256modm alpha[64];
