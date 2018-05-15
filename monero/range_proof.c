@@ -83,7 +83,7 @@ void xmr_gen_range_sig(xmr_range_sig_t * sig, xmr_key_t * C, xmr_key_t * mask, x
   // Second pass, s0, s1
   for(unsigned ii=0; ii<n; ++ii){
     if (BB(ii) == 0){
-      mulsub256_modm(si, alpha[ii], ai[ii], ee);
+      mulsub256_modm(si, ai[ii], ee, alpha[ii]);
       contract256_modm(sig->asig.s0[ii].bytes, si);
 
     } else {
@@ -94,7 +94,7 @@ void xmr_gen_range_sig(xmr_range_sig_t * sig, xmr_key_t * C, xmr_key_t * mask, x
       xmr_add_keys2_vartime(&L, si, ee, &C_tmp);
       xmr_hash_ge25519_to_scalar(c, &L);
 
-      mulsub256_modm(si, alpha[ii], ai[ii], c);
+      mulsub256_modm(si, ai[ii], c, alpha[ii]);
       contract256_modm(sig->asig.s1[ii].bytes, si);
     }
 

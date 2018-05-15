@@ -30,8 +30,11 @@ void copy256_modm(bignum256modm r, const bignum256modm x);
 /* check if nonzero && same after reduction */
 int check256_modm(const bignum256modm x);
 
-/* (aa - bb * cc) % l */
+/* (cc - aa * bb) % l */
 void mulsub256_modm(bignum256modm r, const bignum256modm a, const bignum256modm b, const bignum256modm c);
+
+/* (cc + aa * bb) % l */
+void muladd256_modm(bignum256modm r, const bignum256modm a, const bignum256modm b, const bignum256modm c);
 
 /* uint32_t to Zmod(2^255-19) */
 void curve25519_set(bignum25519 r, uint32_t x);

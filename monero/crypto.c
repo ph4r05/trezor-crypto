@@ -122,10 +122,17 @@ int check256_modm(const bignum256modm x){
 }
 
 void mulsub256_modm(bignum256modm r, const bignum256modm a, const bignum256modm b, const bignum256modm c){
-  //(aa - bb * cc) % l
+  //(cc - aa * bb) % l
   bignum256modm t={0};
-  mul256_modm(t, b, c);
-  sub256_modm(r, a, t);
+  mul256_modm(t, a, b);
+  sub256_modm(r, c, t);
+}
+
+void muladd256_modm(bignum256modm r, const bignum256modm a, const bignum256modm b, const bignum256modm c){
+  //(cc + aa * bb) % l
+  bignum256modm t={0};
+  mul256_modm(t, a, b);
+  add256_modm(r, c, t);
 }
 
 void curve25519_set(bignum25519 r, uint32_t x){
