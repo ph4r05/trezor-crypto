@@ -62,7 +62,7 @@ void xmr_gen_range_sig(xmr_range_sig_t * sig, xmr_key_t * C, xmr_key_t * mask, x
       xmr_hash_ge25519_to_scalar(c, &L);
 
       ge25519_add(&C_tmp, &C_tmp, &C_h, 1); // Ci[ii] -= c_h
-      xmr_add_keys1(&L, si, c, &C_tmp);
+      xmr_add_keys1_vartime(&L, si, c, &C_tmp);
 
       // Set s1[ii] to sigs
       contract256_modm(sig->asig.s1[ii].bytes, si);
@@ -91,7 +91,7 @@ void xmr_gen_range_sig(xmr_range_sig_t * sig, xmr_key_t * C, xmr_key_t * mask, x
       contract256_modm(sig->asig.s0[ii].bytes, si);
 
       ge25519_unpack_vartime(&C_tmp, sig->Ci[ii].bytes);
-      xmr_add_keys1(&L, si, ee, &C_tmp);
+      xmr_add_keys1_vartime(&L, si, ee, &C_tmp);
       xmr_hash_ge25519_to_scalar(c, &L);
 
       mulsub256_modm(si, alpha[ii], ai[ii], c);
