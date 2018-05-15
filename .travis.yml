@@ -1,5 +1,5 @@
 sudo: false
-# dist: trusty
+dist: trusty
 language: c
 
 compiler:
@@ -13,7 +13,6 @@ addons:
     - libssl-dev
     - python3-pip
     - valgrind
-    - libsodium-dev
 
 env:
   global:
