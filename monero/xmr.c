@@ -108,7 +108,7 @@ void xmr_gen_c(ge25519 * r, const bignum256modm a, uint64_t amount){
   ge25519_p1p1_to_full(r, &p1);
 }
 
-void xmr_add_keys1(ge25519 * r, const bignum256modm a, const bignum256modm b, const ge25519 * B){
+void xmr_add_keys2(ge25519 * r, const bignum256modm a, const bignum256modm b, const ge25519 * B){
   // aG + bB, G is basepoint
   ge25519 aG, bB;
   ge25519_pniels bBn;
