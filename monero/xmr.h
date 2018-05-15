@@ -60,6 +60,7 @@ void xmr_add_keys1_vartime(ge25519 * r, const bignum256modm a, const bignum256mo
 
 /* aA + bB */
 void xmr_add_keys2(ge25519 * r, const bignum256modm a, const ge25519 * A, const bignum256modm b, const ge25519 * B);
+void xmr_add_keys2_vartime(ge25519 * r, const bignum256modm a, const ge25519 * A, const bignum256modm b, const ge25519 * B);
 
 /* subaddress secret */
 void xmr_get_subaddress_secret_key(bignum256modm r, uint32_t major, uint32_t minor, const bignum256modm m);

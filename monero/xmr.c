@@ -143,6 +143,11 @@ void xmr_add_keys2(ge25519 * r, const bignum256modm a, const ge25519 * A, const 
   ge25519_p1p1_to_full(r, &p1);
 }
 
+void xmr_add_keys2_vartime(ge25519 * r, const bignum256modm a, const ge25519 * A, const bignum256modm b, const ge25519 * B){
+  // aA + bB
+  ge25519_double_scalarmult_vartime2(r, A, a, B, b);
+}
+
 void xmr_get_subaddress_secret_key(bignum256modm r, uint32_t major, uint32_t minor, const bignum256modm m){
   const char prefix[] = "SubAddr";
   char data[sizeof(prefix) + sizeof(bignum256modm) + 2 * sizeof(uint32_t)];
