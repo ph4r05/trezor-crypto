@@ -55,12 +55,12 @@ void xmr_derive_public_key(ge25519 * r, const ge25519 * deriv, uint32_t idx, con
 void xmr_gen_c(ge25519 * r, const bignum256modm a, uint64_t amount);
 
 /* aG + bB, G is basepoint */
-void xmr_add_keys1(ge25519 * r, const bignum256modm a, const bignum256modm b, const ge25519 * B);
-void xmr_add_keys1_vartime(ge25519 * r, const bignum256modm a, const bignum256modm b, const ge25519 * B);
+void xmr_add_keys2(ge25519 * r, const bignum256modm a, const bignum256modm b, const ge25519 * B);
+void xmr_add_keys2_vartime(ge25519 * r, const bignum256modm a, const bignum256modm b, const ge25519 * B);
 
 /* aA + bB */
-void xmr_add_keys2(ge25519 * r, const bignum256modm a, const ge25519 * A, const bignum256modm b, const ge25519 * B);
-void xmr_add_keys2_vartime(ge25519 * r, const bignum256modm a, const ge25519 * A, const bignum256modm b, const ge25519 * B);
+void xmr_add_keys3(ge25519 * r, const bignum256modm a, const ge25519 * A, const bignum256modm b, const ge25519 * B);
+void xmr_add_keys3_vartime(ge25519 * r, const bignum256modm a, const ge25519 * A, const bignum256modm b, const ge25519 * B);
 
 /* subaddress secret */
 void xmr_get_subaddress_secret_key(bignum256modm r, uint32_t major, uint32_t minor, const bignum256modm m);

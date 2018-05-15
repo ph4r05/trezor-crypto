@@ -123,13 +123,13 @@ void xmr_add_keys1(ge25519 * r, const bignum256modm a, const bignum256modm b, co
   ge25519_p1p1_to_full(r, &p1);
 }
 
-void xmr_add_keys1_vartime(ge25519 * r, const bignum256modm a, const bignum256modm b, const ge25519 * B){
+void xmr_add_keys2_vartime(ge25519 * r, const bignum256modm a, const bignum256modm b, const ge25519 * B){
   // aG + bB, G is basepoint
   ge25519_double_scalarmult_vartime(r, B, b, a);
   ge25519_norm(r, r);
 }
 
-void xmr_add_keys2(ge25519 * r, const bignum256modm a, const ge25519 * A, const bignum256modm b, const ge25519 * B){
+void xmr_add_keys3(ge25519 * r, const bignum256modm a, const ge25519 * A, const bignum256modm b, const ge25519 * B){
   // aA + bB
   ge25519 aA, bB;
   ge25519_pniels bBn;
@@ -144,7 +144,7 @@ void xmr_add_keys2(ge25519 * r, const bignum256modm a, const ge25519 * A, const 
   ge25519_p1p1_to_full(r, &p1);
 }
 
-void xmr_add_keys2_vartime(ge25519 * r, const bignum256modm a, const ge25519 * A, const bignum256modm b, const ge25519 * B){
+void xmr_add_keys3_vartime(ge25519 * r, const bignum256modm a, const ge25519 * A, const bignum256modm b, const ge25519 * B){
   // aA + bB
   ge25519_double_scalarmult_vartime2(r, A, a, B, b);
   ge25519_norm(r, r);
