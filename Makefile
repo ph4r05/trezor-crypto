@@ -68,11 +68,11 @@ OBJS   = $(SRCS:.c=.o)
 TESTLIBS = $(shell pkg-config --libs check) -lpthread -lm
 TESTSSLLIBS = $(shell pkg-config --libs openssl)
 
-LIBTARGET = -DUSE_LIBSODIUM=1
-LIBTARGET += -DSODIUM_STATIC=1
-LIBTARGET += -DRAND_PLATFORM_INDEPENDENT=1
-LIBTARGET += $(shell pkg-config --cflags libsodium)
-LIBTARGET += $(shell pkg-config --libs libsodium)
+LIBTARGETFLAGS = -DUSE_LIBSODIUM=1
+LIBTARGETFLAGS += -DSODIUM_STATIC=1
+LIBTARGETFLAGS += -DRAND_PLATFORM_INDEPENDENT=1
+LIBTARGETFLAGS += $(shell pkg-config --cflags libsodium)
+LIBTARGETLIBS = $(shell pkg-config --libs libsodium)
 
 
 all: tools tests
@@ -113,7 +113,7 @@ tools/bip39bruteforce: tools/bip39bruteforce.o $(OBJS)
 lib: libtrezor-crypto.so
 
 libtrezor-crypto.so: $(SRCS)
-	$(CC) $(CFLAGS) $(LIBTARGET) -fPIC -shared $(SRCS) -o libtrezor-crypto.so
+	$(CC) $(CFLAGS) $(LIBTARGETFLAGS) -fPIC -shared $(SRCS) $(LIBTARGETLIBS) -o libtrezor-crypto.so
 
 clean:
 	rm -f *.o aes/*.o chacha20poly1305/*.o ed25519-donna/*.o
