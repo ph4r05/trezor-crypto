@@ -1,5 +1,5 @@
 sudo: false
-dist: trusty
+# dist: trusty
 language: c
 
 compiler:
@@ -31,10 +31,3 @@ script:
   - ./tests/test_openssl 1000
   - cd ./tests ; ITERS=10 $PYTHON -m pytest ; cd ..
 
-notifications:
-  webhooks:
-    urls:
-      - http://ci-bot.satoshilabs.com:5000/travis
-    on_success: always
-    on_failure: always
-    on_start: always
