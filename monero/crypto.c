@@ -51,12 +51,25 @@ void set256_modm(bignum256modm r, uint64_t v) {
 
 int get256_modm(uint64_t * v, const bignum256modm r){
   *v = 0;
+  int con1 = 0;
+
+#define NONZ(x) ((((((int64_t)(x)) - 1) >> 32) + 1) & 1)
 
   bignum256modm_element_t c = 0;
   c  = r[0];  *v +=  (uint64_t)c & 0x3fffffff;        c >>= 30; // 30
-  c  = r[1];  *v += ((uint64_t)c & 0x3fffffff) << 30; c >>= 30; // 60
-  c  = r[2];  *v += ((uint64_t)c & 0xf)        << 60; c >>= 4;  // 64 bits
-  return c == 0;
+  c += r[1];  *v += ((uint64_t)c & 0x3fffffff) << 30; c >>= 30; // 60
+  c += r[2];  *v += ((uint64_t)c & 0xf)        << 60; con1 |= NONZ(c>>4); // 64 bits
+                                                                       c >>= 30;
+  c += r[3];                                          con1 |= NONZ(c); c >>= 30;
+  c += r[4];                                          con1 |= NONZ(c); c >>= 30;
+  c += r[5];                                          con1 |= NONZ(c); c >>= 30;
+  c += r[6];                                          con1 |= NONZ(c); c >>= 30;
+  c += r[7];                                          con1 |= NONZ(c); c >>= 30;
+  c += r[8];                                          con1 |= NONZ(c); c >>= 30;
+                                                      con1 |= NONZ(c);
+#undef NONZ
+
+  return con1 ^ 1;
 }
 
 int eq256_modm(const bignum256modm x, const bignum256modm y){
