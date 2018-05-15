@@ -42,6 +42,10 @@ void xmr_hasher_final(Hasher * hasher, uint8_t * hash){
   hasher_Final(hasher, hash);
 }
 
+void xmr_hasher_copy(Hasher * dst, const Hasher * src){
+  memcpy(dst, src, sizeof(Hasher));
+}
+
 void xmr_hash_to_scalar(bignum256modm r, const void *data, size_t length){
   uint8_t hash[HASHER_DIGEST_LENGTH];
   hasher_Raw(HASHER_SHA3K, data, length, hash);
