@@ -11,7 +11,7 @@ static void xmr_hash_ge25519_to_scalar(bignum256modm r, const ge25519 *p){
   xmr_hash_to_scalar(r, buff, sizeof(buff));
 }
 
-void xmr_gen_range_sig(xmr_range_sig_t * sig, xmr_key_t * C, xmr_key_t * mask, xmr_amount amount, bignum256modm * last_mask){
+void xmr_gen_range_sig(xmr_range_sig_t * sig, ge25519 * C, bignum256modm mask, xmr_amount amount, bignum256modm * last_mask){
   const unsigned n = XMR_ATOMS;
   bignum256modm a={0};
   bignum256modm ai[64];
@@ -55,7 +55,7 @@ void xmr_gen_range_sig(xmr_range_sig_t * sig, xmr_key_t * C, xmr_key_t * mask, x
     ge25519_add(&C_acc, &C_acc, &C_tmp, 0);
 
     // Set Ci[ii] to sigs
-    ge25519_pack(sig->Ci[ii].bytes, &C_tmp);
+    ge25519_pack(sig->Ci[ii], &C_tmp);
 
     if (BB(ii) == 0) {
       xmr_random_scalar(si);
@@ -65,7 +65,7 @@ void xmr_gen_range_sig(xmr_range_sig_t * sig, xmr_key_t * C, xmr_key_t * mask, x
       xmr_add_keys2_vartime(&L, si, c, &C_tmp);
 
       // Set s1[ii] to sigs
-      contract256_modm(sig->asig.s1[ii].bytes, si);
+      contract256_modm(sig->asig.s1[ii], si);
     }
 
     ge25519_pack(buff, &L);
@@ -84,26 +84,26 @@ void xmr_gen_range_sig(xmr_range_sig_t * sig, xmr_key_t * C, xmr_key_t * mask, x
   for(unsigned ii=0; ii<n; ++ii){
     if (BB(ii) == 0){
       mulsub256_modm(si, ai[ii], ee, alpha[ii]);
-      contract256_modm(sig->asig.s0[ii].bytes, si);
+      contract256_modm(sig->asig.s0[ii], si);
 
     } else {
       xmr_random_scalar(si);
-      contract256_modm(sig->asig.s0[ii].bytes, si);
+      contract256_modm(sig->asig.s0[ii], si);
 
-      ge25519_unpack_vartime(&C_tmp, sig->Ci[ii].bytes);
+      ge25519_unpack_vartime(&C_tmp, sig->Ci[ii]);
       xmr_add_keys2_vartime(&L, si, ee, &C_tmp);
       xmr_hash_ge25519_to_scalar(c, &L);
 
       mulsub256_modm(si, ai[ii], c, alpha[ii]);
-      contract256_modm(sig->asig.s1[ii].bytes, si);
+      contract256_modm(sig->asig.s1[ii], si);
     }
 
     ge25519_double(&C_h, &C_h);  // c_H = crypto.scalarmult(c_H, 2)
   }
 
-  ge25519_pack(C->bytes, &C_acc);
-  contract256_modm(mask->bytes, a);
-  contract256_modm(sig->asig.ee.bytes, ee);
+  ge25519_copy(C, &C_acc);
+  copy256_modm(mask, a);
+  contract256_modm(sig->asig.ee, ee);
 #undef BB
 }
 

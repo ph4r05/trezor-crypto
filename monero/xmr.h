@@ -10,9 +10,7 @@
 
 extern const ge25519 ALIGN(16) xmr_h;
 
-typedef struct xmr_key {
-  unsigned char bytes[32];
-} xmr_key_t;
+typedef unsigned char xmr_key_t[32];
 
 typedef struct xmr_ctkey {
   xmr_key_t dest;
