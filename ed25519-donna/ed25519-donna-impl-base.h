@@ -51,6 +51,9 @@ void ge25519_set_neutral(ge25519 *r);
 /* computes [s1]p1 + [s2]base */
 void ge25519_double_scalarmult_vartime(ge25519 *r, const ge25519 *p1, const bignum256modm s1, const bignum256modm s2);
 
+/* computes [s1]p1 + [s2]p2 */
+void ge25519_double_scalarmult_vartime2(ge25519 *r, const ge25519 *p1, const bignum256modm s1, const ge25519 *p2, const bignum256modm s2);
+
 /* computes [s1]p1, constant time */
 void ge25519_scalarmult(ge25519 *r, const ge25519 *p1, const bignum256modm s1);
 

@@ -53,8 +53,7 @@
 #include "rc4.h"
 #include "nem.h"
 
-#include "monero/base58.h"
-#include "monero/crypto.h"
+#include "monero/monero.h"
 
 
 /*
@@ -2612,7 +2611,8 @@ START_TEST(test_ed25519_modl_add)
 	};
 
 	unsigned char buff[32];
-	bignum256modm a={0}, b={0}, c={0};
+	bignum256modm a={0}, b={0}, c={0}, d={0};
+	set256_modm(d, 1);
 
 	for (size_t i = 0; i < (sizeof(tests) / sizeof(*tests)); i++) {
 		expand256_modm(a, fromhex(tests[i][0]), 32);
@@ -2620,6 +2620,10 @@ START_TEST(test_ed25519_modl_add)
 		add256_modm(c, a, b);
 		contract256_modm(buff, c);
 		ck_assert_mem_eq(buff, fromhex(tests[i][2]), 32);
+		expand256_modm(a, fromhex(tests[i][2]), 32);
+		ck_assert_int_eq(eq256_modm(a, c), 1);
+		add256_modm(c, c, d);
+		ck_assert_int_eq(eq256_modm(a, c), 0);
 	}
 }
 END_TEST
@@ -2807,15 +2811,83 @@ START_TEST(test_xmr_base58)
 }
 END_TEST
 
+START_TEST(test_xmr_check_point)
+{
+	static const struct {
+		char * p;
+		bool on;
+	} tests[] = {
+			{"001000a93e0e6937b4feaf079e418a028ca85459aa39ac3871b94076f88ca608", true},
+			{"54863a0464c008acc99cffb179bc6cf34eb1bbdf6c29f7a070a7c6376ae30ab5", true},
+			{"bebe3c84092c0f7a92704cafb16562cc45c47f45e84baec8d4bba3559d1c1808", true},
+			{"00000000000000c60073ec000000000000ff0000000000000000000000000080", false},
+			{"00000000000000004e0000000000000000000000000000000000000000000000", false},
+			{"0000008b0000000000000000b200000000000000000000000000000000000080", false},
+			{"a0953eebe2f676256c37af4f6f84f32d397aaf3b73606e96c5ddfcecbb1ceec8", false},
+			{"a82cd837efee505ec8425769ea925bee869ec3c78a57708c64c2ef2bd6ad3b88", false},
+			{"031c56cfc99758f6f025630e77c6dea0b853c3ab0bf6cf8c8dab03d1a4618178", false},
+	};
+
+	ge25519 tmp={0};
+	for (size_t i = 0; i < (sizeof(tests) / sizeof(*tests)); i++) {
+		int res = ge25519_unpack_negative_vartime(&tmp, fromhex(tests[i].p));
+		ck_assert_int_eq(ge25519_check(&tmp), tests[i].on);
+		ck_assert_int_eq(res, tests[i].on);
+	}
+}
+END_TEST
+
+START_TEST(test_xmr_h)
+{
+	char * H = "8b655970153799af2aeadc9ff1add0ea6c7251d54154cfa92c173a0dd39c1f94";
+	ge25519 H2, Z;
+	ge25519_p1p1 P_11;
+	ge25519_pniels P_ni;
+	uint8_t buff[32] = {0};
+	uint8_t buff2[32] = {0};
+
+	ge25519_pack(buff, &xmr_h);
+	ck_assert_mem_eq(buff, fromhex(H), 32);
+
+	int res = ge25519_unpack_vartime(&H2, buff);
+	ck_assert_int_eq(res, 1);
+	ck_assert_int_eq(ge25519_eq(&xmr_h, &xmr_h), 1);
+	ck_assert_int_eq(ge25519_eq(&H2, &xmr_h), 1);
+
+	res = ge25519_unpack_negative_vartime(&H2, buff);
+	ck_assert_int_eq(res, 1);
+	ck_assert_int_eq(ge25519_eq(&H2, &xmr_h), 0);
+	ge25519_neg_full(&H2);
+	ck_assert_int_eq(ge25519_eq(&H2, &xmr_h), 1);
+
+	ge25519_full_to_pniels(&P_ni, &xmr_h);
+	ge25519_pnielsadd_p1p1(&P_11, &H2, &P_ni, 1);
+	ge25519_p1p1_to_full(&H2, &P_11);
+	ge25519_set_neutral(&Z);
+	ck_assert_int_eq(ge25519_eq(&Z, &H2), 1);
+}
+END_TEST
+
 START_TEST(test_xmr_hash_to_scalar)
 {
 	bignum256modm a1;
 	unsigned char out[32];
-	char * xx = "259ef2aba8feb473cf39058a0fe30b9ff6d245b42b6826687ebd6b63128aff6405";
-	char * exp = "9907925b254e12162609fc0dfd0fef2aa4d605b0d10e6507cac253dd31a3ec06";
-	xmr_hash_to_scalar(fromhex(xx), 33, a1);
-	contract256_modm(out, a1);
-	ck_assert_mem_eq(out, fromhex(exp), 32);
+	char tests[][2][65] = {
+			{"", "4a078e76cd41a3d3b534b83dc6f2ea2de500b653ca82273b7bfad8045d85a400"},
+			{"00", "5497c9b6a7059553835f85118dc089d66512f7b477d66591ff96a9e064bcc90a"},
+			{"000102", "5727ca206dbafa2e099b022ed528f5bdf7874e3ec09c8f012159dfeeaab2b106"},
+			{"000102030405", "7740cf04577c107153a50b3abe44859f5245d3d545c6cbf5052e80258ae80607"},
+			{"000102030406", "ad6bbffaceb8020543ac82bcadb9d090b553ca1260035eae982d669ff6494f02"},
+			{"000102030407", "d2e116e9576ee5a29011c8fcb41259f99e6933b1d3bb660d0a9ac54e12e5cd06"},
+			{"259ef2aba8feb473cf39058a0fe30b9ff6d245b42b6826687ebd6b63128aff64", "3d6d3727dc50bca39e6ccfc9c12950eef5845e4278565d17f95559513a244d02"},
+			{"44caa1c26187afe8dacc5d91cb8a51282334d9308a818fe4d3607275e2a61f05", "aecc45c83f0408c96c70f8273e94f930edfbd3cd98896a0e57b1b5929fa5ff0b"},
+	};
+
+	for (size_t i = 0; i < (sizeof(tests) / sizeof(*tests)); i++) {
+		xmr_hash_to_scalar(a1, fromhex(tests[i][0]), strlen(tests[i][0])/2);
+		contract256_modm(out, a1);
+		ck_assert_mem_eq(out, fromhex(tests[i][1]), 32);
+	}
 }
 END_TEST
 
@@ -2823,11 +2895,22 @@ START_TEST(test_xmr_hash_to_ec)
 {
 	ge25519 p1;
 	unsigned char out[32];
-	char * yy = "42f6835bf83114a1f5f6076fe79bdfa0bd67c74b88f127d54572d3910dd09201";
-	char * exp = "54863a0464c008acc99cffb179bc6cf34eb1bbdf6c29f7a070a7c6376ae30ab5";
-	xmr_hash_to_ec(fromhex(yy), 32, &p1);
-	ge25519_pack(out, &p1);
-	ck_assert_mem_eq(out, fromhex(exp), 32);
+	char tests[][2][65] = {
+			{"", "d6d7d783ab18e1be65586adb7902a4175b737ef0b902875e1d1d5c5cf0478c0b"},
+			{"00", "8e2fecb36320bc4e192e10ef54afc7c83fbeb0c38b7debd4fea51301f0bd4f3d"},
+			{"000102", "73b233e2e75d81b9657a857e38e7ab2bc3600e5c56622b9fe4b976ff312220fa"},
+			{"000102030405", "bebe3c84092c0f7a92704cafb16562cc45c47f45e84baec8d4bba3559d1c1808"},
+			{"000102030406", "525567a6a40a94f2d916bc1efea234bbd3b9162403ec2faba871a90f8d0d487e"},
+			{"000102030407", "99b1be2a92cbd22b24b48fb7a9daadd4d13a56915c4f6ed696f271ad5bdbc149"},
+			{"42f6835bf83114a1f5f6076fe79bdfa0bd67c74b88f127d54572d3910dd09201", "54863a0464c008acc99cffb179bc6cf34eb1bbdf6c29f7a070a7c6376ae30ab5"},
+			{"44caa1c26187afe8dacc5d91cb8a51282334d9308a818fe4d3607275e2a61f05", "001000a93e0e6937b4feaf079e418a028ca85459aa39ac3871b94076f88ca608"},
+	};
+
+	for (size_t i = 0; i < (sizeof(tests) / sizeof(*tests)); i++) {
+		xmr_hash_to_ec(&p1, fromhex(tests[i][0]), strlen(tests[i][0])/2);
+		ge25519_pack(out, &p1);
+		ck_assert_mem_eq(out, fromhex(tests[i][1]), 32);
+	}
 }
 END_TEST
 
@@ -2852,6 +2935,8 @@ Suite *test_suite(void)
 	suite_add_tcase(s, tc);
 
 	tc = tcase_create("xmr_crypto");
+	tcase_add_test(tc, test_xmr_check_point);
+	tcase_add_test(tc, test_xmr_h);
 	tcase_add_test(tc, test_xmr_hash_to_scalar);
 	tcase_add_test(tc, test_xmr_hash_to_ec);
 	suite_add_tcase(s, tc);

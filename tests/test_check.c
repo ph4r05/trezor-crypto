@@ -63,7 +63,7 @@
 #include "address.h"
 #include "rc4.h"
 #include "nem.h"
-#include "monero/base58.h"
+#include "monero/monero.h"
 
 /*
  * This is a clever trick to make Valgrind's Memcheck verify code

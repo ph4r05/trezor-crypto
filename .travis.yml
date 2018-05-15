@@ -39,18 +39,26 @@ before_install:
 #    build_command: "make"
 #    branch_pattern: coverity_scan
 
+cache:
+  cargo: true
+  apt: true
+  directories:
+  - $HOME/libsodium
+
 install:
+  - ./travis-install-libsodium.sh
+  - export PKG_CONFIG_PATH=$HOME/libsodium/lib/pkgconfig:$PKG_CONFIG_PATH
+  - export LD_LIBRARY_PATH=$HOME/libsodium/lib:$LD_LIBRARY_PATH
   - $PYTHON -m pip install --user pytest ecdsa curve25519-donna
 
 script:
   - make
   - test $TRAVIS_BRANCH != coverity_scan || exit 0
+  - make lib
   - ./tests/aestst
   - ./tests/test_check
   - CK_TIMEOUT_MULTIPLIER=20 valgrind -q --error-exitcode=1 ./tests/test_check
   - ./tests/test_openssl 1000
   - cd ./tests ; ITERS=10 $PYTHON -m pytest ; cd ..
-
-
 
 

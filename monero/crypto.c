@@ -8,6 +8,7 @@
 #include <stdbool.h>
 
 #include <hasher.h>
+#include "serialize.h"
 
 static const uint32_t reduce_mask_25 = (1 << 25) - 1;
 static const uint32_t reduce_mask_26 = (1 << 26) - 1;
@@ -20,8 +21,8 @@ const bignum25519 ALIGN(16) fe_sqrtm1 = {
     0x20ea0b0, 0x186c9d2, 0x08f189d, 0x035697f, 0x0bd0c60, 0x1fbd7a7, 0x2804c9e, 0x1e16569, 0x004fc1d, 0x0ae0c92}; /* sqrt(-1) */
 const bignum25519 ALIGN(16) fe_d2 = {
     0x2b2f159, 0x1a6e509, 0x22add7a, 0x0d4141d, 0x0038052, 0x0f3d130, 0x3407977, 0x19ce331, 0x1c56dff, 0x0901b67}; /* 2 * d */
-/* A = 2 * (1 - d) / (1 + d) = 486662 */
 
+/* A = 2 * (1 - d) / (1 + d) = 486662 */
 const bignum25519 ALIGN(16) fe_ma2 = {
     0x33de3c9, 0x1fff236, 0x3ffffff, 0x1ffffff, 0x3ffffff, 0x1ffffff, 0x3ffffff, 0x1ffffff, 0x3ffffff, 0x1ffffff}; /* -A^2 */
 const bignum25519 ALIGN(16) fe_ma = {
@@ -35,12 +36,6 @@ const bignum25519 ALIGN(16) fe_fffb3 = {
 const bignum25519 ALIGN(16) fe_fffb4 = {
     0x2b39186, 0x14640ed, 0x14930a7, 0x04509fa, 0x3b91bf0, 0x0f7432e, 0x07a443f, 0x17f24d8, 0x031067d, 0x0690fcc}; /* sqrt(sqrt(-1) * A * (A + 2)) */
 
-const ge25519 ALIGN(16) xmr_h = {
-    {0x1861ec7, 0x1ceac77, 0x2f11626, 0x1f261d3, 0x346107c, 0x06d8c4a, 0x254201d, 0x1675c09, 0x1301c3f, 0x0211d73},
-    {0x326feb4, 0x12e30cc, 0x0cf54b4, 0x1117305, 0x318f5d5, 0x06cf754, 0x2e578a1, 0x1daf058, 0x34430a1, 0x04410e9},
-    {0x0fde4d2, 0x0774049, 0x22ca951, 0x05aec2b, 0x07a36a5, 0x1394f13, 0x3c5385c, 0x1adb924, 0x2b6c581, 0x0a55fa4},
-    {0x24517f7, 0x05ee936, 0x3acf5d9, 0x14b08aa, 0x3363738, 0x1051745, 0x360601e, 0x0f3f2c9, 0x1ead2cd, 0x1d3e3df}
-};
 
 void set256_modm(bignum256modm r, uint64_t v) {
   r[0] = (bignum256modm_element_t) (v & 0x3fffffff); v >>= 30;
@@ -54,13 +49,23 @@ void set256_modm(bignum256modm r, uint64_t v) {
   r[8] = 0;
 }
 
+int get256_modm(uint64_t * v, const bignum256modm r){
+  *v = 0;
+
+  bignum256modm_element_t c = 0;
+  c  = r[0];  *v +=  (uint64_t)c & 0x3fffffff;        c >>= 30; // 30
+  c  = r[1];  *v += ((uint64_t)c & 0x3fffffff) << 30; c >>= 30; // 60
+  c  = r[2];  *v += ((uint64_t)c & 0xf)        << 60; c >>= 4;  // 64 bits
+  return c == 0;
+}
+
 int eq256_modm(const bignum256modm x, const bignum256modm y){
   size_t differentbits = 0;
   int len = bignum256modm_limb_size;
   while (len--) {
     differentbits |= (*x++ ^ *y++);
   }
-  return (int) (1 & ((differentbits - 1) >> 8));
+  return (int) (1 & ((differentbits - 1) >> bignum256modm_bits_per_limb));
 }
 
 int cmp256_modm(const bignum256modm x, const bignum256modm y){
@@ -89,13 +94,45 @@ int iszero256_modm(const bignum256modm x){
   while (len--) {
     differentbits |= (*x++);
   }
-  return (int) (1 & ((differentbits - 1) >> 8));
+  return (int) (1 & ((differentbits - 1) >> bignum256modm_bits_per_limb));
 }
 
-void ge25519_mul8(ge25519 *r, const ge25519 *t) {
-  ge25519_double_partial(r, t);
-  ge25519_double_partial(r, r);
-  ge25519_double(r, r);
+void copy256_modm(bignum256modm r, const bignum256modm x){
+  r[0] = x[0];
+  r[1] = x[1];
+  r[2] = x[2];
+  r[3] = x[3];
+  r[4] = x[4];
+  r[5] = x[5];
+  r[6] = x[6];
+  r[7] = x[7];
+  r[8] = x[8];
+}
+
+int check256_modm(const bignum256modm x){
+  int ok = 1;
+  bignum256modm t={0};
+
+  ok &= iszero256_modm(x) ^ 1;
+  copy256_modm(t, x);
+  reduce256_modm(t);
+  ok &= eq256_modm(t, x);
+
+  return ok;
+}
+
+void mulsub256_modm(bignum256modm r, const bignum256modm a, const bignum256modm b, const bignum256modm c){
+  //(cc - aa * bb) % l
+  bignum256modm t={0};
+  mul256_modm(t, a, b);
+  sub256_modm(r, c, t);
+}
+
+void muladd256_modm(bignum256modm r, const bignum256modm a, const bignum256modm b, const bignum256modm c){
+  //(cc + aa * bb) % l
+  bignum256modm t={0};
+  mul256_modm(t, a, b);
+  add256_modm(r, c, t);
 }
 
 void curve25519_set(bignum25519 r, uint32_t x){
@@ -111,6 +148,18 @@ void curve25519_set(bignum25519 r, uint32_t x){
    r[9] = 0;
 }
 
+void curve25519_set_d(bignum25519 r){
+  curve25519_copy(r, ge25519_ecd);
+}
+
+void curve25519_set_2d(bignum25519 r){
+  curve25519_copy(r, ge25519_ec2d);
+}
+
+void curve25519_set_sqrtneg1(bignum25519 r){
+  curve25519_copy(r, ge25519_sqrtneg1);
+}
+
 int curve25519_isnegative(const bignum25519 f) {
   unsigned char s[32];
   curve25519_contract(s, f);
@@ -120,10 +169,25 @@ int curve25519_isnegative(const bignum25519 f) {
 int curve25519_isnonzero(const bignum25519 f) {
   unsigned char s[32];
   curve25519_contract(s, f);
-  return (((int) (s[0] | s[1] | s[2] | s[3] | s[4] | s[5] | s[6] | s[7] | s[8] |
+  return ((((int) (s[0] | s[1] | s[2] | s[3] | s[4] | s[5] | s[6] | s[7] | s[8] |
                   s[9] | s[10] | s[11] | s[12] | s[13] | s[14] | s[15] | s[16] | s[17] |
                   s[18] | s[19] | s[20] | s[21] | s[22] | s[23] | s[24] | s[25] | s[26] |
-                  s[27] | s[28] | s[29] | s[30] | s[31]) - 1) >> 8) + 1;
+                  s[27] | s[28] | s[29] | s[30] | s[31]) - 1) >> 8) + 1) & 0x1;
+}
+
+void curve25519_reduce(bignum25519 out, const bignum25519 in) {
+  uint32_t c;
+  out[0] = in[0]    ; c = (out[0] >> 26); out[0] &= reduce_mask_26;
+  out[1] = in[1] + c; c = (out[1] >> 25); out[1] &= reduce_mask_25;
+  out[2] = in[2] + c; c = (out[2] >> 26); out[2] &= reduce_mask_26;
+  out[3] = in[3] + c; c = (out[3] >> 25); out[3] &= reduce_mask_25;
+  out[4] = in[4] + c; c = (out[4] >> 26); out[4] &= reduce_mask_26;
+  out[5] = in[5] + c; c = (out[5] >> 25); out[5] &= reduce_mask_25;
+  out[6] = in[6] + c; c = (out[6] >> 26); out[6] &= reduce_mask_26;
+  out[7] = in[7] + c; c = (out[7] >> 25); out[7] &= reduce_mask_25;
+  out[8] = in[8] + c; c = (out[8] >> 26); out[8] &= reduce_mask_26;
+  out[9] = in[9] + c; c = (out[9] >> 25); out[9] &= reduce_mask_25;
+  out[0] += 19 * c;
 }
 
 static void curve25519_divpowm1(bignum25519 r, const bignum25519 u, const bignum25519 v) {
@@ -233,6 +297,54 @@ void curve25519_expand_reduce(bignum25519 out, const unsigned char in[32]) {
   out[9] &= reduce_mask_25;
 }
 
+int ge25519_check(const ge25519 *r){
+  /* return (z % q != 0 and
+             x * y % q == z * t % q and
+            (y * y - x * x - z * z - ed25519.d * t * t) % q == 0)
+   */
+
+  bignum25519 z={0}, lhs={0}, rhs={0}, tmp={0}, res={0};
+  curve25519_reduce(z, r->z);
+
+  curve25519_mul(lhs, r->x, r->y);
+  curve25519_mul(rhs, r->z, r->t);
+  curve25519_sub_reduce(lhs, lhs, rhs);
+
+  curve25519_square(res, r->y);
+  curve25519_square(tmp, r->x);
+  curve25519_sub_reduce(res, res, tmp);
+  curve25519_square(tmp, r->z);
+  curve25519_sub_reduce(res, res, tmp);
+  curve25519_square(tmp, r->t);
+  curve25519_mul(tmp, tmp, ge25519_ecd);
+  curve25519_sub_reduce(res, res, tmp);
+
+  const int c1 = curve25519_isnonzero(z);
+  const int c2 = curve25519_isnonzero(lhs);
+  const int c3 = curve25519_isnonzero(res);
+  return c1 & (c2^0x1) & (c3^0x1);
+}
+
+int ge25519_eq(const ge25519 *a, const ge25519 *b){
+  int eq = 1;
+  bignum25519 t1={0}, t2={0};
+
+  eq &= ge25519_check(a);
+  eq &= ge25519_check(b);
+
+  curve25519_mul(t1, a->x, b->z);
+  curve25519_mul(t2, b->x, a->z);
+  curve25519_sub_reduce(t1, t1, t2);
+  eq &= curve25519_isnonzero(t1) ^ 1;
+
+  curve25519_mul(t1, a->y, b->z);
+  curve25519_mul(t2, b->y, a->z);
+  curve25519_sub_reduce(t1, t1, t2);
+  eq &= curve25519_isnonzero(t1) ^ 1;
+
+  return eq;
+}
+
 void ge25519_copy(ge25519 *dst, const ge25519 *src){
   curve25519_copy(dst->x, src->x);
   curve25519_copy(dst->y, src->y);
@@ -244,12 +356,48 @@ void ge25519_set_base(ge25519 *r){
   ge25519_copy(r, &ge25519_basepoint);
 }
 
-void ge25519_set_xmr_h(ge25519 *r){
-  ge25519_copy(r, &xmr_h);
+void ge25519_mul8(ge25519 *r, const ge25519 *t) {
+  ge25519_double_partial(r, t);
+  ge25519_double_partial(r, r);
+  ge25519_double(r, r);
+}
+
+void ge25519_neg_partial(ge25519 *r){
+  curve25519_neg(r->x, r->x);
+}
+
+void ge25519_neg_full(ge25519 *r){
+  curve25519_neg(r->x, r->x);
+  curve25519_neg(r->t, r->t);
+}
+
+void ge25519_reduce(ge25519 *r, const ge25519 *t){
+  curve25519_reduce(r->x, t->x);
+  curve25519_reduce(r->y, t->y);
+  curve25519_reduce(r->z, t->z);
+  curve25519_reduce(r->t, t->t);
+}
+
+void ge25519_norm(ge25519 *r, const ge25519 * t){
+  bignum25519 zinv;
+  curve25519_recip(zinv, t->z);
+  curve25519_mul(r->x, t->x, zinv);
+  curve25519_mul(r->y, t->y, zinv);
+  curve25519_mul(r->t, r->x, r->y);
+  curve25519_set(r->z, 1);
+}
+
+void ge25519_add(ge25519 *r, const ge25519 *p, const ge25519 *q, unsigned char signbit) {
+  ge25519_pniels P_ni;
+  ge25519_p1p1 P_11;
+
+  ge25519_full_to_pniels(&P_ni, q);
+  ge25519_pnielsadd_p1p1(&P_11, p, &P_ni, signbit);
+  ge25519_p1p1_to_full(r, &P_11);
 }
 
 void ge25519_fromfe_frombytes_vartime(ge25519 *r, const unsigned char *s){
-  bignum25519 u, v, w, x, y, z;
+  bignum25519 u={0}, v={0}, w={0}, x={0}, y={0}, z={0};
   unsigned char sign;
 
   curve25519_expand_reduce(u, s);
@@ -313,7 +461,7 @@ setsign:
 
 #if !defined(NDEBUG)
   {
-    bignum25519 check_x, check_y, check_iz, check_v;
+    bignum25519 check_x={0}, check_y={0}, check_iz={0}, check_v={0};
     curve25519_recip(check_iz, r->z);
     curve25519_mul(check_x, r->x, check_iz);
     curve25519_mul(check_y, r->y, check_iz);
@@ -330,18 +478,72 @@ setsign:
 #endif
 }
 
-void xmr_hash_to_scalar(const void *data, size_t length, bignum256modm r){
-  uint8_t hash[HASHER_DIGEST_LENGTH];
-  hasher_Raw(HASHER_SHA3K, data, length, hash);
-  expand256_modm(r, hash, HASHER_DIGEST_LENGTH);
+int ge25519_unpack_vartime(ge25519 *r, const unsigned char *s){
+  int res = ge25519_unpack_negative_vartime(r, s);
+  ge25519_neg_full(r);
+  return res;
 }
 
-void xmr_hash_to_ec(const void *data, size_t length, ge25519 *P){
-  ge25519 point2;
-  uint8_t hash[HASHER_DIGEST_LENGTH];
-  hasher_Raw(HASHER_SHA3K, data, length, hash);
-
-  ge25519_fromfe_frombytes_vartime(&point2, hash);
-  ge25519_mul8(P, &point2);
+void ge25519_scalarmult_base_wrapper(ge25519 *r, const bignum256modm s){
+  ge25519_scalarmult_base_niels(r, ge25519_niels_base_multiples, s);
+  ge25519_norm(r, r);
 }
 
+void ge25519_scalarmult_wrapper(ge25519 *r, const ge25519 *P, const bignum256modm a){
+  ge25519_scalarmult(r, P, a);
+  ge25519_norm(r, r);
+}
+
+
+#ifdef XMR_DEBUG
+void ge25519_add_vartime(ge25519 *r, const ge25519 *p, const ge25519 *q, unsigned char signbit) {
+  bignum25519 a, b, c, d, e, f, g, h;
+  ge25519 Q;
+  ge25519_copy(&Q, q);
+
+  if(signbit){
+    ge25519_neg_full(&Q);
+  }
+
+  curve25519_sub_reduce(g, p->y, p->x);
+  curve25519_sub_reduce(h, Q.y, Q.x);
+  curve25519_mul(a, g, h);
+
+  curve25519_add_reduce(g, p->y, p->x);
+  curve25519_add_reduce(h, Q.y, Q.x);
+  curve25519_mul(b, g, h);
+
+  curve25519_mul(c, p->t, Q.t);
+  curve25519_mul(c, c, ge25519_ec2d);
+
+  curve25519_mul(d, p->z, Q.z);
+  curve25519_add_reduce(d, d, d);
+
+  curve25519_sub_reduce(e, b, a);
+  curve25519_sub_reduce(f, d, c);
+  curve25519_add_reduce(g, d, c);
+  curve25519_add_reduce(h, b, a);
+
+  curve25519_mul(r->x, e, f);
+  curve25519_mul(r->y, g, h);
+  curve25519_mul(r->t, e, h);
+  curve25519_mul(r->z, f, g);
+}
+
+void debug_sc(const bignum256modm r){
+  for(int i=0; i<9; i++){
+    printf(" %x", r[i]);
+  }
+  printf("\n");
+}
+
+void debug_pt(const ge25519 *p){
+  unsigned char buff[32];
+  ge25519_pack(buff, p);
+
+  for(int i=0; i<32; i++){
+    printf("%02x", buff[i]);
+  }
+  printf("\n");
+}
+#endif

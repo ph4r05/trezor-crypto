@@ -14,4 +14,5 @@ tests/libtrezor-crypto.so
 *.pyc
 cmake-build-*/
 .idea/
+venv/
 
