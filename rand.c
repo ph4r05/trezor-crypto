@@ -50,7 +50,7 @@ uint32_t random32(void)
 
 #endif /* RAND_PLATFORM_INDEPENDENT */
 
-#if USE_LIBSODIUM
+#if defined(USE_LIBSODIUM) && USE_LIBSODIUM
 
 #include <sodium.h>
 
