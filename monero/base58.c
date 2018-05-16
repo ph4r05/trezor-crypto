@@ -47,210 +47,210 @@ const size_t addr_checksum_size = 4;
 const int decoded_block_sizes[] = {0, -1, 1, 2, -1, 3, 4, 5, -1, 6, 7, 8};
 
 static const int8_t reverse_alphabet_tbl[] = {
-    0,  1,  2,  3,  4,  5,  6,  7,  8, -1, -1, -1, -1, -1, -1, -1,
-    9, 10, 11, 12, 13, 14, 15, 16, -1, 17, 18, 19, 20, 21, -1, 22,
-    23, 24, 25, 26, 27, 28, 29, 30, 31, 32, -1, -1, -1, -1, -1, -1,
-    33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, -1, 44, 45, 46, 47,
-    48, 49, 50, 51, 52, 53, 54, 55, 56, 57
+		0,  1,  2,  3,  4,  5,  6,  7,  8, -1, -1, -1, -1, -1, -1, -1,
+		9, 10, 11, 12, 13, 14, 15, 16, -1, 17, 18, 19, 20, 21, -1, 22,
+		23, 24, 25, 26, 27, 28, 29, 30, 31, 32, -1, -1, -1, -1, -1, -1,
+		33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, -1, 44, 45, 46, 47,
+		48, 49, 50, 51, 52, 53, 54, 55, 56, 57
 };
 
 static inline int8_t reverse_alphabet(char letter){
-  const ssize_t idx = (ssize_t)(letter - alphabet[0]);
-  return (int8_t) (idx >= 0 && (size_t)idx < sizeof(reverse_alphabet_tbl) ? reverse_alphabet_tbl[(size_t)idx] : -1);
+	const ssize_t idx = (ssize_t)(letter - alphabet[0]);
+	return (int8_t) (idx >= 0 && (size_t)idx < sizeof(reverse_alphabet_tbl) ? reverse_alphabet_tbl[(size_t)idx] : -1);
 }
 
 uint64_t uint_8be_to_64(const uint8_t* data, size_t size)
 {
-  assert(1 <= size && size <= sizeof(uint64_t));
+	assert(1 <= size && size <= sizeof(uint64_t));
 
-  uint64_t res = 0;
-  switch (9 - size)
-  {
-  case 1:            res |= *data++; /* FALLTHRU */
-  case 2: res <<= 8; res |= *data++; /* FALLTHRU */
-  case 3: res <<= 8; res |= *data++; /* FALLTHRU */
-  case 4: res <<= 8; res |= *data++; /* FALLTHRU */
-  case 5: res <<= 8; res |= *data++; /* FALLTHRU */
-  case 6: res <<= 8; res |= *data++; /* FALLTHRU */
-  case 7: res <<= 8; res |= *data++; /* FALLTHRU */
-  case 8: res <<= 8; res |= *data; break;
-  default: assert(false);
-  }
+	uint64_t res = 0;
+	switch (9 - size)
+	{
+	case 1:            res |= *data++; /* FALLTHRU */
+	case 2: res <<= 8; res |= *data++; /* FALLTHRU */
+	case 3: res <<= 8; res |= *data++; /* FALLTHRU */
+	case 4: res <<= 8; res |= *data++; /* FALLTHRU */
+	case 5: res <<= 8; res |= *data++; /* FALLTHRU */
+	case 6: res <<= 8; res |= *data++; /* FALLTHRU */
+	case 7: res <<= 8; res |= *data++; /* FALLTHRU */
+	case 8: res <<= 8; res |= *data; break;
+	default: assert(false);
+	}
 
-  return res;
+	return res;
 }
 
 void uint_64_to_8be(uint64_t num, size_t size, uint8_t* data)
 {
-  assert(1 <= size && size <= sizeof(uint64_t));
+	assert(1 <= size && size <= sizeof(uint64_t));
 
-  uint64_t num_be = SWAP64(num);
-  memcpy(data, (uint8_t*)(&num_be) + sizeof(uint64_t) - size, size);
+	uint64_t num_be = SWAP64(num);
+	memcpy(data, (uint8_t*)(&num_be) + sizeof(uint64_t) - size, size);
 }
 
 void encode_block(const char* block, size_t size, char* res)
 {
-  assert(1 <= size && size <= full_block_size);
+	assert(1 <= size && size <= full_block_size);
 
-  uint64_t num = uint_8be_to_64((uint8_t*)(block), size);
-  int i = (int)(encoded_block_sizes[size]) - 1;
-  while (0 < num)
-  {
-    uint64_t remainder = num % alphabet_size;
-    num /= alphabet_size;
-    res[i] = alphabet[remainder];
-    --i;
-  }
+	uint64_t num = uint_8be_to_64((uint8_t*)(block), size);
+	int i = (int)(encoded_block_sizes[size]) - 1;
+	while (0 < num)
+	{
+		uint64_t remainder = num % alphabet_size;
+		num /= alphabet_size;
+		res[i] = alphabet[remainder];
+		--i;
+	}
 }
 
 bool decode_block(const char* block, size_t size, char* res)
 {
-  assert(1 <= size && size <= full_encoded_block_size);
+	assert(1 <= size && size <= full_encoded_block_size);
 
-  int res_size = decoded_block_sizes[size];
-  if (res_size <= 0)
-    return false; // Invalid block size
+	int res_size = decoded_block_sizes[size];
+	if (res_size <= 0)
+		return false; // Invalid block size
 
-  uint64_t res_num = 0;
-  uint64_t order = 1;
-  for (size_t i = size - 1; i < size; --i)
-  {
-    int digit = reverse_alphabet(block[i]);
-    if (digit < 0)
-      return false; // Invalid symbol
+	uint64_t res_num = 0;
+	uint64_t order = 1;
+	for (size_t i = size - 1; i < size; --i)
+	{
+		int digit = reverse_alphabet(block[i]);
+		if (digit < 0)
+			return false; // Invalid symbol
 
-    uint64_t product_hi;
-    uint64_t tmp = res_num + mul128(order, (uint64_t) digit, &product_hi);
-    if (tmp < res_num || 0 != product_hi)
-      return false; // Overflow
+		uint64_t product_hi;
+		uint64_t tmp = res_num + mul128(order, (uint64_t) digit, &product_hi);
+		if (tmp < res_num || 0 != product_hi)
+			return false; // Overflow
 
-    res_num = tmp;
-    order *= alphabet_size; // Never overflows, 58^10 < 2^64
-  }
+		res_num = tmp;
+		order *= alphabet_size; // Never overflows, 58^10 < 2^64
+	}
 
-  if ((size_t)res_size < full_block_size && (UINT64_C(1) << (8 * res_size)) <= res_num)
-    return false; // Overflow
+	if ((size_t)res_size < full_block_size && (UINT64_C(1) << (8 * res_size)) <= res_num)
+		return false; // Overflow
 
-  uint_64_to_8be(res_num, res_size, (uint8_t*)(res));
+	uint_64_to_8be(res_num, res_size, (uint8_t*)(res));
 
-  return true;
+	return true;
 }
 
 
 bool xmr_base58_encode(char *b58, size_t *b58sz, const void *data, size_t binsz)
 {
-  if (binsz==0)
-    return true;
+	if (binsz==0)
+		return true;
 
-  const char * data_bin = data;
-  size_t full_block_count = binsz / full_block_size;
-  size_t last_block_size = binsz % full_block_size;
-  size_t res_size = full_block_count * full_encoded_block_size + encoded_block_sizes[last_block_size];
+	const char * data_bin = data;
+	size_t full_block_count = binsz / full_block_size;
+	size_t last_block_size = binsz % full_block_size;
+	size_t res_size = full_block_count * full_encoded_block_size + encoded_block_sizes[last_block_size];
 
-  if (b58sz){
-    if (res_size >= *b58sz){
-      return false;
-    }
-    *b58sz = res_size;
-  }
+	if (b58sz){
+		if (res_size >= *b58sz){
+			return false;
+		}
+		*b58sz = res_size;
+	}
 
-  for (size_t i = 0; i < full_block_count; ++i)
-  {
-    encode_block(data_bin + i * full_block_size, full_block_size, b58 + i * full_encoded_block_size);
-  }
+	for (size_t i = 0; i < full_block_count; ++i)
+	{
+		encode_block(data_bin + i * full_block_size, full_block_size, b58 + i * full_encoded_block_size);
+	}
 
-  if (0 < last_block_size)
-  {
-    encode_block(data_bin + full_block_count * full_block_size, last_block_size, b58 + full_block_count * full_encoded_block_size);
-  }
+	if (0 < last_block_size)
+	{
+		encode_block(data_bin + full_block_count * full_block_size, last_block_size, b58 + full_block_count * full_encoded_block_size);
+	}
 
-  return true;
+	return true;
 }
 
 bool xmr_base58_decode(const char *b58, size_t b58sz, void *data, size_t *binsz)
 {
-  if (b58sz == 0) {
-    *binsz = 0;
-    return true;
-  }
+	if (b58sz == 0) {
+		*binsz = 0;
+		return true;
+	}
 
-  size_t full_block_count = b58sz / full_encoded_block_size;
-  size_t last_block_size = b58sz % full_encoded_block_size;
-  int last_block_decoded_size = decoded_block_sizes[last_block_size];
-  if (last_block_decoded_size < 0) {
-    *binsz = 0;
-    return false; // Invalid enc length
-  }
+	size_t full_block_count = b58sz / full_encoded_block_size;
+	size_t last_block_size = b58sz % full_encoded_block_size;
+	int last_block_decoded_size = decoded_block_sizes[last_block_size];
+	if (last_block_decoded_size < 0) {
+		*binsz = 0;
+		return false; // Invalid enc length
+	}
 
-  size_t data_size = full_block_count * full_block_size + last_block_decoded_size;
-  if (*binsz < data_size){
-    *binsz = 0;
-    return false;
-  }
+	size_t data_size = full_block_count * full_block_size + last_block_decoded_size;
+	if (*binsz < data_size){
+		*binsz = 0;
+		return false;
+	}
 
-  char * data_bin = data;
-  for (size_t i = 0; i < full_block_count; ++i)
-  {
-    if (!decode_block(b58 + i * full_encoded_block_size, full_encoded_block_size, data_bin + i * full_block_size))
-      return false;
-  }
+	char * data_bin = data;
+	for (size_t i = 0; i < full_block_count; ++i)
+	{
+		if (!decode_block(b58 + i * full_encoded_block_size, full_encoded_block_size, data_bin + i * full_block_size))
+			return false;
+	}
 
-  if (0 < last_block_size)
-  {
-    if (!decode_block(b58 + full_block_count * full_encoded_block_size, last_block_size,
-                      data_bin + full_block_count * full_block_size))
-      return false;
-  }
+	if (0 < last_block_size)
+	{
+		if (!decode_block(b58 + full_block_count * full_encoded_block_size, last_block_size,
+											data_bin + full_block_count * full_block_size))
+			return false;
+	}
 
-  return true;
+	return true;
 }
 
 int xmr_base58_addr_encode_check(uint64_t tag, const uint8_t *data, size_t binsz, char *b58, size_t b58sz)
 {
-  if (binsz > 128 || tag > 127) {  // tag varint
-    return false;
-  }
+	if (binsz > 128 || tag > 127) {  // tag varint
+		return false;
+	}
 
-  size_t b58size = b58sz;
-  uint8_t buf[binsz + 1 + HASHER_DIGEST_LENGTH];
-  uint8_t *hash = buf + binsz + 1;
-  buf[0] = (uint8_t) tag;
-  memcpy(buf + 1, data, binsz);
-  hasher_Raw(HASHER_SHA3K, buf, binsz + 1, hash);
+	size_t b58size = b58sz;
+	uint8_t buf[binsz + 1 + HASHER_DIGEST_LENGTH];
+	uint8_t *hash = buf + binsz + 1;
+	buf[0] = (uint8_t) tag;
+	memcpy(buf + 1, data, binsz);
+	hasher_Raw(HASHER_SHA3K, buf, binsz + 1, hash);
 
-  bool r = xmr_base58_encode(b58, &b58size, buf, binsz + 1 + addr_checksum_size);
-  return (int) (!r ? 0 : b58size);
+	bool r = xmr_base58_encode(b58, &b58size, buf, binsz + 1 + addr_checksum_size);
+	return (int) (!r ? 0 : b58size);
 }
 
 int xmr_base58_addr_decode_check(const char *addr, size_t sz, uint64_t *tag, void *data, size_t datalen)
 {
-  size_t buflen = 1 + 64 + addr_checksum_size;
-  uint8_t buf[buflen];
-  uint8_t hash[HASHER_DIGEST_LENGTH];
+	size_t buflen = 1 + 64 + addr_checksum_size;
+	uint8_t buf[buflen];
+	uint8_t hash[HASHER_DIGEST_LENGTH];
 
-  if (!xmr_base58_decode(addr, sz, buf, &buflen)){
-    return 0;
-  }
+	if (!xmr_base58_decode(addr, sz, buf, &buflen)){
+		return 0;
+	}
 
-  size_t res_size = buflen - addr_checksum_size - 1;
-  if (datalen < res_size){
-    return 0;
-  }
+	size_t res_size = buflen - addr_checksum_size - 1;
+	if (datalen < res_size){
+		return 0;
+	}
 
-  if (buflen <= addr_checksum_size+1) {
-    return 0;
-  }
+	if (buflen <= addr_checksum_size+1) {
+		return 0;
+	}
 
-  hasher_Raw(HASHER_SHA3K, buf, buflen - addr_checksum_size, hash);
-  if (memcmp(hash, buf + buflen - addr_checksum_size, addr_checksum_size) != 0){
-    return 0;
-  }
+	hasher_Raw(HASHER_SHA3K, buf, buflen - addr_checksum_size, hash);
+	if (memcmp(hash, buf + buflen - addr_checksum_size, addr_checksum_size) != 0){
+		return 0;
+	}
 
-  *tag = buf[0];
-  if (*tag > 127){
-    return false; // varint
-  }
+	*tag = buf[0];
+	if (*tag > 127){
+		return false; // varint
+	}
 
-  memcpy(data, buf+1, res_size);
-  return (int) res_size;
+	memcpy(data, buf+1, res_size);
+	return (int) res_size;
 }
