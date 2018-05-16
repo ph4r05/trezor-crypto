@@ -88,27 +88,10 @@ void xmr_derive_public_key(ge25519 * r, const ge25519 * deriv, uint32_t idx, con
 
 	xmr_derivation_to_scalar(s, deriv, idx);
 	ge25519_scalarmult_base_niels(&p2, ge25519_niels_base_multiples, s);
+	ge25519_norm(&p2, &p2);
 
 	ge25519_full_to_pniels(&Bp, base);
 	ge25519_pnielsadd_p1p1(&p1, &p2, &Bp, 0);
-	ge25519_p1p1_to_full(r, &p1);
-}
-
-void xmr_gen_c(ge25519 * r, const bignum256modm a, uint64_t amount){
-	// C = aG + bH
-	ge25519 A, B;
-	bignum256modm b={0};
-	ge25519_pniels Bp;
-	ge25519_p1p1 p1;
-
-	ge25519_scalarmult_base_niels(&A, ge25519_niels_base_multiples, a);
-
-	set256_modm(b, amount);
-	ge25519_scalarmult(&B, &xmr_h, b);
-	ge25519_norm(&B, &B);
-
-	ge25519_full_to_pniels(&Bp, &B);
-	ge25519_pnielsadd_p1p1(&p1, &A, &Bp, 0);
 	ge25519_p1p1_to_full(r, &p1);
 }
 
@@ -167,3 +150,9 @@ void xmr_get_subaddress_secret_key(bignum256modm r, uint32_t major, uint32_t min
 	xmr_hash_to_scalar(r, data, sizeof(data));
 }
 
+void xmr_gen_c(ge25519 * r, const bignum256modm a, uint64_t amount){
+	// C = aG + bH
+	bignum256modm b={0};
+	set256_modm(b, amount);
+	xmr_add_keys2(r, a, b, &xmr_h);
+}
