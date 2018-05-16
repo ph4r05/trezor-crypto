@@ -308,7 +308,6 @@ void ge25519_double_scalarmult_vartime2(ge25519 *r, const ge25519 *p1, const big
 	for (i = 0; i < S1_TABLE_SIZE - 1; i++)
 		ge25519_pnielsadd(&pre2[i+1], &dp, &pre2[i]);
 
-
 	ge25519_set_neutral(r);
 
 	i = 255;
