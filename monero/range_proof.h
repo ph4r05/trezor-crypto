@@ -12,14 +12,14 @@ typedef uint64_t xmr_amount;
 typedef xmr_key_t xmr_key64_t[64];
 
 typedef struct xmr_boro_sig {
-  xmr_key64_t s0;
-  xmr_key64_t s1;
-  xmr_key_t ee;
+	xmr_key64_t s0;
+	xmr_key64_t s1;
+	xmr_key_t ee;
 } xmr_boro_sig_t;
 
 typedef struct range_sig {
-  xmr_boro_sig_t asig;
-  xmr_key64_t Ci;
+	xmr_boro_sig_t asig;
+	xmr_key64_t Ci;
 } xmr_range_sig_t;
 
 

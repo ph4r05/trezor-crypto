@@ -323,10 +323,10 @@ void ge25519_double_scalarmult_vartime2(ge25519 *r, const ge25519 *p1, const big
 			ge25519_pnielsadd_p1p1(&t, r, &pre1[abs(slide1[i]) / 2], (unsigned char)slide1[i] >> 7);
 		}
 
-    if (slide2[i]) {
-      ge25519_p1p1_to_full(r, &t);
-      ge25519_pnielsadd_p1p1(&t, r, &pre2[abs(slide2[i]) / 2], (unsigned char)slide2[i] >> 7);
-    }
+		if (slide2[i]) {
+			ge25519_p1p1_to_full(r, &t);
+			ge25519_pnielsadd_p1p1(&t, r, &pre2[abs(slide2[i]) / 2], (unsigned char)slide2[i] >> 7);
+		}
 
 		ge25519_p1p1_to_partial(r, &t);
 	}
