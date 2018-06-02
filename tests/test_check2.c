@@ -2948,46 +2948,6 @@ Suite *test_suite(void)
 	tc = tcase_create("base58");
 	tcase_add_test(tc, test_base58);
 	suite_add_tcase(s, tc);
-//
-//	tc = tcase_create("bip32-ecdh");
-//	tcase_add_test(tc, test_bip32_ecdh_nist256p1);
-//	tcase_add_test(tc, test_bip32_ecdh_curve25519);
-//	tcase_add_test(tc, test_bip32_ecdh_errors);
-//	suite_add_tcase(s, tc);
-//
-//	tc = tcase_create("ecdsa");
-//	tcase_add_test(tc, test_ecdsa_signature);
-//	suite_add_tcase(s, tc);
-//
-//	tc = tcase_create("rfc6979");
-//	tcase_add_test(tc, test_rfc6979);
-//	suite_add_tcase(s, tc);
-//
-//	tc = tcase_create("address");
-//	tcase_add_test(tc, test_address);
-//	suite_add_tcase(s, tc);
-//
-//	tc = tcase_create("address_decode");
-//	tcase_add_test(tc, test_address_decode);
-//	suite_add_tcase(s, tc);
-//
-//	tc = tcase_create("ethereum_address");
-//	tcase_add_test(tc, test_ethereum_address);
-//	suite_add_tcase(s, tc);
-//
-//	tc = tcase_create("wif");
-//	tcase_add_test(tc, test_wif);
-//	suite_add_tcase(s, tc);
-//
-//	tc = tcase_create("ecdsa_der");
-//	tcase_add_test(tc, test_ecdsa_der);
-//	suite_add_tcase(s, tc);
-//
-//	tc = tcase_create("sha2");
-//	tcase_add_test(tc, test_sha1);
-//	tcase_add_test(tc, test_sha256);
-//	tcase_add_test(tc, test_sha512);
-//	suite_add_tcase(s, tc);
 
 	tc = tcase_create("sha3");
 	tcase_add_test(tc, test_sha3_256);
@@ -2995,57 +2955,6 @@ Suite *test_suite(void)
 	tcase_add_test(tc, test_keccak_256);
 	suite_add_tcase(s, tc);
 
-//	tc = tcase_create("blake");
-//	tcase_add_test(tc, test_blake256);
-//	suite_add_tcase(s, tc);
-//
-//	tc = tcase_create("blake2");
-//	tcase_add_test(tc, test_blake2b);
-//	tcase_add_test(tc, test_blake2s);
-//	suite_add_tcase(s, tc);
-//
-//	tc = tcase_create("pbkdf2");
-//	tcase_add_test(tc, test_pbkdf2_hmac_sha256);
-//	tcase_add_test(tc, test_pbkdf2_hmac_sha512);
-//	suite_add_tcase(s, tc);
-//
-//	tc = tcase_create("bip39");
-//	tcase_add_test(tc, test_mnemonic);
-//	tcase_add_test(tc, test_mnemonic_check);
-//	suite_add_tcase(s, tc);
-//
-//	tc = tcase_create("pubkey_validity");
-//	tcase_add_test(tc, test_pubkey_validity);
-//	suite_add_tcase(s, tc);
-//
-//	tc = tcase_create("pubkey_uncompress");
-//	tcase_add_test(tc, test_pubkey_uncompress);
-//	suite_add_tcase(s, tc);
-//
-//	tc = tcase_create("codepoints");
-//	tcase_add_test(tc, test_codepoints_secp256k1);
-//	tcase_add_test(tc, test_codepoints_nist256p1);
-//	suite_add_tcase(s, tc);
-//
-//	tc = tcase_create("mult_border_cases");
-//	tcase_add_test(tc, test_mult_border_cases_secp256k1);
-//	tcase_add_test(tc, test_mult_border_cases_nist256p1);
-//	suite_add_tcase(s, tc);
-//
-//	tc = tcase_create("scalar_mult");
-//	tcase_add_test(tc, test_scalar_mult_secp256k1);
-//	tcase_add_test(tc, test_scalar_mult_nist256p1);
-//	suite_add_tcase(s, tc);
-//
-//	tc = tcase_create("point_mult");
-//	tcase_add_test(tc, test_point_mult_secp256k1);
-//	tcase_add_test(tc, test_point_mult_nist256p1);
-//	suite_add_tcase(s, tc);
-//
-//	tc = tcase_create("scalar_point_mult");
-//	tcase_add_test(tc, test_scalar_point_mult_secp256k1);
-//	tcase_add_test(tc, test_scalar_point_mult_nist256p1);
-//	suite_add_tcase(s, tc);
 
 	tc = tcase_create("ed25519");
 	tcase_add_test(tc, test_ed25519);
@@ -3059,47 +2968,6 @@ Suite *test_suite(void)
 	tcase_add_test(tc, test_ed25519_cosi);
 	suite_add_tcase(s, tc);
 
-//	tc = tcase_create("script");
-//	tcase_add_test(tc, test_output_script);
-//	suite_add_tcase(s, tc);
-//
-//	tc = tcase_create("ethereum_pubkeyhash");
-//	tcase_add_test(tc, test_ethereum_pubkeyhash);
-//	suite_add_tcase(s, tc);
-//
-//	tc = tcase_create("nem_address");
-//	tcase_add_test(tc, test_nem_address);
-//	suite_add_tcase(s, tc);
-//
-//	tc = tcase_create("nem_encryption");
-//	tcase_add_test(tc, test_nem_derive);
-//	tcase_add_test(tc, test_nem_cipher);
-//	suite_add_tcase(s, tc);
-//
-//	tc = tcase_create("nem_transaction");
-//	tcase_add_test(tc, test_nem_transaction_transfer);
-//	tcase_add_test(tc, test_nem_transaction_multisig);
-//	tcase_add_test(tc, test_nem_transaction_provision_namespace);
-//	tcase_add_test(tc, test_nem_transaction_mosaic_creation);
-//	tcase_add_test(tc, test_nem_transaction_mosaic_supply_change);
-//	tcase_add_test(tc, test_nem_transaction_aggregate_modification);
-//	suite_add_tcase(s, tc);
-//
-//	tc = tcase_create("multibyte_address");
-//	tcase_add_test(tc, test_multibyte_address);
-//	suite_add_tcase(s, tc);
-//
-//	tc = tcase_create("rc4");
-//	tcase_add_test(tc, test_rc4_rfc6229);
-//	suite_add_tcase(s, tc);
-//
-//	tc = tcase_create("segwit");
-//	tcase_add_test(tc, test_segwit);
-//	suite_add_tcase(s, tc);
-//
-//	tc = tcase_create("cashaddr");
-//	tcase_add_test(tc, test_cashaddr);
-//	suite_add_tcase(s, tc);
 
 	return s;
 }
