@@ -93,8 +93,8 @@ void encode_block(const char* block, size_t size, char* res)
 	assert(1 <= size && size <= full_block_size);
 
 	uint64_t num = uint_8be_to_64((uint8_t*)(block), size);
-	int i = (int)(encoded_block_sizes[size]) - 1;
-	while (0 < num)
+	int i = ((int)(encoded_block_sizes[size])) - 1;
+	while (0 <= i)
 	{
 		uint64_t remainder = num % alphabet_size;
 		num /= alphabet_size;

@@ -31,7 +31,6 @@
 #ifndef __XMR_BASE58_H__
 #define __XMR_BASE58_H__
 
-#include <stdint.h>
 #include <stdbool.h>
 #include "hasher.h"
 #include "options.h"
