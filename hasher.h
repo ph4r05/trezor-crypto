@@ -30,6 +30,7 @@
 #include "sha3.h"
 #include "blake256.h"
 #include "groestl.h"
+#include "blake2b.h"
 
 #define HASHER_DIGEST_LENGTH 32
 
@@ -47,6 +48,11 @@ typedef enum {
 #if USE_KECCAK
     HASHER_SHA3K,
 #endif
+
+    HASHER_OVERWINTER_PREVOUTS,
+    HASHER_OVERWINTER_SEQUENCE,
+    HASHER_OVERWINTER_OUTPUTS,
+    HASHER_OVERWINTER_PREIMAGE,
 } HasherType;
 
 typedef struct {
@@ -57,6 +63,7 @@ typedef struct {
         SHA3_CTX sha3;
         BLAKE256_CTX blake;
         GROESTL512_CTX groestl;
+        BLAKE2B_CTX blake2b;
     } ctx;
 } Hasher;
 
