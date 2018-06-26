@@ -187,6 +187,7 @@ void ECRYPT_keystream_bytes(
  */
 #define ECRYPT_USES_DEFAULT_ALL_IN_ONE        /* [edit] */
 
+#if 0
 void ECRYPT_encrypt_packet(
   ECRYPT_ctx* ctx, 
   const u8* iv,
@@ -200,6 +201,7 @@ void ECRYPT_decrypt_packet(
   const u8* ciphertext, 
   u8* plaintext, 
   u32 msglen);
+#endif
 
 /*
  * Encryption/decryption of blocks.
