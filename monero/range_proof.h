@@ -23,6 +23,6 @@ typedef struct range_sig {
 } xmr_range_sig_t;
 
 
-void xmr_gen_range_sig(xmr_range_sig_t * sig, ge25519 * C, bignum256modm mask, xmr_amount amount, const bignum256modm * last_mask);
+void xmr_gen_range_sig(xmr_range_sig_t * sig, ge25519 * C, bignum256modm mask, xmr_amount amount, bignum256modm * last_mask);
 
 #endif //TREZOR_CRYPTO_RANGE_PROOF_H
