@@ -3573,50 +3573,6 @@ START_TEST(test_ed25519_modl_sub)
 }
 END_TEST
 
-START_TEST(test_xmr_base58)
-{
-	static const struct {
-		uint64_t tag;
-		char * v1;
-		char * v2;
-	} tests[] = {
-		{0x12,
-			"3bec484c5d7f0246af520aab550452b5b6013733feabebd681c4a60d457b7fc12d5918e31d3c003da3c778592c07b398ad6f961a67082a75fd49394d51e69bbe",
-			"43tpGG9PKbwCpjRvNLn1jwXPpnacw2uVUcszAtgmDiVcZK4VgHwjJT9BJz1WGF9eMxSYASp8yNMkuLjeQfWqJn3CNWdWfzV"
-		},
-		{0x12,
-			"639050436fa36c8288706771412c5972461578d564188cd7fc6f81d6973d064fa461afe66fb23879936d7225051bebbf7f3ae0c801a90bb99fbb346b2fd4d702",
-			"45PwgoUKaDHNqLL8o3okzLL7biv7GqPVmd8LTcTrYVrMEKdSYwFcyJfMLSRpfU3nh8Z2m81FJD4sUY3nXCdGe61k1HAp8T1"
-		},
-		{53,
-			"5a10cca900ee47a7f412cd661b29f5ab356d6a1951884593bb170b5ec8b6f2e83b1da411527d062c9fedeb2dad669f2f5585a00a88462b8c95c809a630e5734c",
-			"9vacMKaj8JJV6MnwDzh2oNVdwTLJfTDyNRiB6NzV9TT7fqvzLivH2dB8Tv7VYR3ncn8vCb3KdNMJzQWrPAF1otYJ9cPKpkr"
-		},
-	};
-
-	uint8_t rawn[512];
-	char strn[512];
-	int r;
-	uint64_t tag;
-
-	for (size_t i = 0; i < (sizeof(tests) / sizeof(*tests)); i++) {
-		const char *raw = tests[i].v1;
-		const char *str = tests[i].v2;
-		const size_t len = strlen(raw) / 2;
-
-		memcpy(rawn, fromhex(raw), len);
-
-		r = xmr_base58_addr_encode_check(tests[i].tag, rawn, len, strn, sizeof(strn));
-		ck_assert_int_eq((size_t)r, strlen(str));
-    ck_assert_mem_eq(strn, str, r);
-
-		r = xmr_base58_addr_decode_check(strn, r, &tag, rawn, len);
-		ck_assert_int_eq(r, len);
-		ck_assert_mem_eq(rawn, fromhex(raw), len);
-	}
-}
-END_TEST
-
 START_TEST(test_ge25519_double_scalarmult_vartime2)
 {
 	char tests[][5][65] = {
@@ -4695,6 +4651,603 @@ END_TEST
 
 #include "test_check_cashaddr.h"
 
+
+START_TEST(test_xmr_base58)
+{
+	static const struct {
+		uint64_t tag;
+		char *v1;
+		char *v2;
+	} tests[] = {
+			{0x12,
+				"3bec484c5d7f0246af520aab550452b5b6013733feabebd681c4a60d457b7fc12d5918e31d3c003da3c778592c07b398ad6f961a67082a75fd49394d51e69bbe",
+				"43tpGG9PKbwCpjRvNLn1jwXPpnacw2uVUcszAtgmDiVcZK4VgHwjJT9BJz1WGF9eMxSYASp8yNMkuLjeQfWqJn3CNWdWfzV"
+			},
+			{0x12,
+				"639050436fa36c8288706771412c5972461578d564188cd7fc6f81d6973d064fa461afe66fb23879936d7225051bebbf7f3ae0c801a90bb99fbb346b2fd4d702",
+				"45PwgoUKaDHNqLL8o3okzLL7biv7GqPVmd8LTcTrYVrMEKdSYwFcyJfMLSRpfU3nh8Z2m81FJD4sUY3nXCdGe61k1HAp8T1"
+			},
+			{53,
+				"5a10cca900ee47a7f412cd661b29f5ab356d6a1951884593bb170b5ec8b6f2e83b1da411527d062c9fedeb2dad669f2f5585a00a88462b8c95c809a630e5734c",
+				"9vacMKaj8JJV6MnwDzh2oNVdwTLJfTDyNRiB6NzV9TT7fqvzLivH2dB8Tv7VYR3ncn8vCb3KdNMJzQWrPAF1otYJ9cPKpkr"
+			},
+	};
+
+	uint8_t rawn[512];
+	char strn[512];
+	int r;
+	uint64_t tag;
+
+	for (size_t i = 0; i < (sizeof(tests) / sizeof(*tests)); i++) {
+		const char *raw = tests[i].v1;
+		const char *str = tests[i].v2;
+		const size_t len = strlen(raw) / 2;
+
+		memcpy(rawn, fromhex(raw), len);
+
+		r = xmr_base58_addr_encode_check(tests[i].tag, rawn, len, strn, sizeof(strn));
+		ck_assert_int_eq((size_t) r, strlen(str));
+		ck_assert_mem_eq(strn, str, r);
+
+		r = xmr_base58_addr_decode_check(strn, r, &tag, rawn, len);
+		ck_assert_int_eq(r, len);
+		ck_assert_mem_eq(rawn, fromhex(raw), len);
+	}
+}
+END_TEST
+
+
+START_TEST(test_xmr_getset256_modm)
+{
+	static const struct {
+		uint64_t val;
+		int r;
+		char *a;
+	} tests[] = {
+			{0x0, 1,
+				"0000000000000000000000000000000000000000000000000000000000000000"},
+			{0x7fffffffULL, 1,
+				"ffffff7f00000000000000000000000000000000000000000000000000000000"},
+			{0x7fffffffffffffffULL, 1,
+				"ffffffffffffff7f000000000000000000000000000000000000000000000000"},
+			{0xdeadc0deULL, 1,
+				"dec0adde00000000000000000000000000000000000000000000000000000000"},
+			{0x0, 0,
+				"dec0adde000000000000000000000000000000000000000000000000000000ff"},
+			{0x0,  0,
+				"ffffffffffffffffff0000000000000000000000000000000000000000000000"},
+
+	};
+
+	uint8_t rawn[32];
+	uint64_t v1;
+	bignum256modm a1 = {0};
+
+	for (size_t i = 0; i < (sizeof(tests) / sizeof(*tests)); i++) {
+		int get_res = tests[i].r;
+		if (get_res) {
+			set256_modm(a1, tests[i].val);
+			ck_assert_int_eq(get256_modm(&v1, a1), 1);
+			ck_assert(v1 == tests[i].val);
+
+			contract256_modm(rawn, a1);
+			ck_assert_mem_eq(rawn, fromhex(tests[i].a), 32);
+
+		} else {
+			expand256_modm(a1, fromhex(tests[i].a), 32);
+			ck_assert_int_eq(get256_modm(&v1, a1), 0);
+		}
+	}
+}
+END_TEST
+
+
+START_TEST(test_xmr_cmp256_modm)
+{
+	static const struct {
+		char *a;
+		char *b;
+		int res_eq;
+		int res_cmp;
+		int res_is_zero_a;
+	} tests[] = {
+			{
+				"0000000000000000000000000000000000000000000000000000000000000000",
+				"0000000000000000000000000000000000000000000000000000000000000000",
+				1, 0,  1
+			},
+			{
+				"0000000000000000000000000000000000000000000000000000000000000000",
+				"0100000000000000000000000000000000000000000000000000000000000000",
+				0, -1, 1
+			},
+			{
+				"dec0adde00000000000000000000000000000000000000000000000000000000",
+				"dec0adde00000000000000000000000000000000000000000000000000000000",
+				1, 0,  0
+			},
+			{
+				"863346d8863c461cde2ec7c2759352c2b952228f33a86ca06bb79574bbe5c30d",
+				"3ddbd65a6d3ba5e2ab120603685a353a27ce3fd21dfdbea7952d2dd26f1ca00a",
+				0, 1,  0
+			},
+			{
+				"f7667f392edbea6e224b1aa9fbf2a3b238b4f977fb4a8f39130cc45f49b5c40a",
+				"b41b9b1e7e80be71cf290ed4bded58924086b8ac6bdfa1faa0c80c255f074d07",
+				0, 1,  0
+			},
+			{
+				"0e4005c7826de8f9978749903f40efd140e4ae6d3bed09e558fcce8367b27501",
+				"0e4005c7826de8f9978749903f40efd140e4ae6d3bed09e558fcce8367b27504",
+				0, -1, 0
+			},
+
+			{
+				"0e4005c7826de8f9978749903f40efd140e4ae6d3bed09e558fcce8367b27504",
+				"0e4005c7826de8f9978749903f40efd140e4ae6d3bed09e558fcce8367b27504",
+				1, 0,  0
+			},
+
+	};
+
+	bignum256modm a1 = {0}, a2 = {0};
+
+	for (size_t i = 0; i < (sizeof(tests) / sizeof(*tests)); i++) {
+		expand256_modm(a1, fromhex(tests[i].a), 32);
+		expand256_modm(a2, fromhex(tests[i].b), 32);
+
+		ck_assert_int_eq(eq256_modm(a1, a2), tests[i].res_eq);
+		ck_assert_int_eq(cmp256_modm(a1, a2), tests[i].res_cmp);
+		ck_assert_int_eq(iszero256_modm(a1), tests[i].res_is_zero_a);
+	}
+}
+END_TEST
+
+
+START_TEST(test_xmr_copy_check_modm)
+{
+	static const struct {
+		int check;
+		char *a;
+	} tests[] = {
+			{0,
+				"0000000000000000000000000000000000000000000000000000000000000000"},
+			{1,
+				"ffffff7f00000000000000000000000000000000000000000000000000000000"},
+			{1,
+				"ffffffffffffff7f000000000000000000000000000000000000000000000000"},
+			{1,
+				"dec0adde00000000000000000000000000000000000000000000000000000000"},
+			{0,
+				"dec0adde000000000000000000000fffffffffffffffffffffffffffffffffff"},
+
+	};
+
+	bignum256modm a1 = {0}, a2 = {0};
+
+	for (size_t i = 0; i < (sizeof(tests) / sizeof(*tests)); i++) {
+		expand_raw256_modm(a1, fromhex(tests[i].a));
+		copy256_modm(a2, a1);
+		ck_assert_int_eq(eq256_modm(a1, a2), 1);
+		ck_assert_int_eq(check256_modm(a1), tests[i].check);
+	}
+
+}
+END_TEST
+
+
+START_TEST(test_xmr_mulsub256_modm)
+{
+	static const struct {
+		char *a;
+		char *b;
+		char *c;
+		char *r;
+	} tests[] = {
+			{
+				"713c199348cf7d14b67ae6265ea49c02c8647f07afcbcb6f8d3254b3db972e02",
+				"4e48a7b7a03ab1106fdfa9441a03c97c644395a12ac4b8effac7344e0719c200",
+				"1a5711b8c43bcab0161a620368d82727e1d027dc248f420d9bb4db2486c16405",
+				"6edcc08aa6ec3a5b3d333b5f826be7de9c268be8aaf9521586fbcccbed3b1c0c",
+			},
+			{
+				"d4ade2c62d34af8cfd9daec6f46bf7e57962a8aa46935cb11fab64fa599b4700",
+				"22ea7989a9f4d34cd8c9442e03b5062dfe8493757cd18a63411cb1a25e44960f",
+				"772053e613f0859387badcefeb7fbe551a05b00b9337539c8d72661de5929806",
+				"a5063258df4520b33e97c0a46d80feeace5c251fc7ef7a938d160b8f25795106",
+			},
+			{
+				"01fd2ef25c8221277a2b6daf1f1642bacb8d6ac0dd4f62731cdd73e26eb77900",
+				"0611b9357530aa638428002769ce0ad553421e971bea1f10d7009bf26d9af805",
+				"dfece232068b2f8059ca569f345baaed13ab464eb3bebb99de5625dc90a8cf03",
+				"85752e62bd8085c7c02d5edeb74969d22f1a5bb34349258d2e96de300176bb07",
+			},
+	};
+
+	bignum256modm a = {0}, b = {0}, c = {0}, r = {0}, r2 = {0};
+
+	for (size_t i = 0; i < (sizeof(tests) / sizeof(*tests)); i++) {
+		expand256_modm(a, fromhex(tests[i].a), 32);
+		expand256_modm(b, fromhex(tests[i].b), 32);
+		expand256_modm(c, fromhex(tests[i].c), 32);
+		expand256_modm(r, fromhex(tests[i].r), 32);
+		mulsub256_modm(r2, a, b, c);
+		ck_assert_int_eq(eq256_modm(r, r2), 1);
+	}
+}
+END_TEST
+
+
+START_TEST(test_xmr_muladd256_modm)
+{
+	static const struct {
+		char *a;
+		char *b;
+		char *c;
+		char *r;
+	} tests[] = {
+			{
+				"7c3fd8abfbe2be3739d91679ac8dbda086961b941e0d4a00561f758927d8aa09",
+				"ac2d8d37e4f344aa4040d0f0fc29d45423ab7e69ecacb94ca9fc36819e0e990e",
+				"2f03f1bac09bc7d002848b68be069dc98b2db028390ae37e13a5166fcae08105",
+				"dce113add3392f08e3b38b7d31e237eba5066e5a95a1fdbf755b92d05e1ec70b",
+			},
+			{
+				"6979b70f6198d043f4b14e2069f7b89cc9f09e3465e71d472946443989e0e80c",
+				"8dd5177bc8d7c5bd58c0be74b336952a73ac259ebb812ac8cd755773c6aab807",
+				"d7658e508a7454ccfb29e2890d6156ac10e18ebe6e00cc5a2d2d87a5080c7f06",
+				"51b33f6263772781cdbab26ef48870eaf94899894a437dac39496f15b9d0ae00",
+			},
+			{
+				"ebfdb4eabedb1fb9a45b3204735b0511871e20358392fa16a851c519e3a29b09",
+				"59d98831e9f9e24260158986c4d4035438de9b8876cc11bdcf4c364c75f72908",
+				"93bce4764eee97dc67f2e37da40bc5641f2cdc637285d273287a3d4383b68f02",
+				"21547ca6855c85d5adcd673b9d801d0cb0f10dced8f8b68a8c2f74163defde0e",
+			},
+	};
+
+	bignum256modm a = {0}, b = {0}, c = {0}, r = {0}, r2 = {0};
+
+	for (size_t i = 0; i < (sizeof(tests) / sizeof(*tests)); i++) {
+		expand256_modm(a, fromhex(tests[i].a), 32);
+		expand256_modm(b, fromhex(tests[i].b), 32);
+		expand256_modm(c, fromhex(tests[i].c), 32);
+		expand256_modm(r, fromhex(tests[i].r), 32);
+		muladd256_modm(r2, a, b, c);
+		ck_assert_int_eq(eq256_modm(r, r2), 1);
+	}
+
+}
+END_TEST
+
+
+START_TEST(test_xmr_curve25519_set)
+{
+	static const struct {
+		uint32_t val;
+		char *a;
+	} tests[] = {
+			{0x0,
+				"0000000000000000000000000000000000000000000000000000000000000000"},
+			{0x1,
+				"0100000000000000000000000000000000000000000000000000000000000000"},
+			{0xdeadc0deUL,
+				"dec0adde00000000000000000000000000000000000000000000000000000000"},
+	};
+
+	unsigned char buff[32];
+	bignum25519 a = {0}, b = {0};
+
+	for (size_t i = 0; i < (sizeof(tests) / sizeof(*tests)); i++) {
+		curve25519_set(a, tests[i].val);
+		curve25519_contract(buff, a);
+		ck_assert_mem_eq(buff, fromhex(tests[i].a), 32);
+	}
+}
+END_TEST
+
+
+START_TEST(test_xmr_curve25519_consts)
+{
+	char *d = "a3785913ca4deb75abd841414d0a700098e879777940c78c73fe6f2bee6c0352";
+	char *d2 = "59f1b226949bd6eb56b183829a14e00030d1f3eef2808e19e7fcdf56dcd90624";
+	char *sqrtneg1 = "b0a00e4a271beec478e42fad0618432fa7d7fb3d99004d2b0bdfc14f8024832b";
+
+	unsigned char buff[32];
+	bignum25519 a = {0};
+
+	curve25519_set_d(a);
+	curve25519_contract(buff, a);
+	ck_assert_mem_eq(buff, fromhex(d), 32);
+
+	curve25519_set_2d(a);
+	curve25519_contract(buff, a);
+	ck_assert_mem_eq(buff, fromhex(d2), 32);
+
+	curve25519_set_sqrtneg1(a);
+	curve25519_contract(buff, a);
+	ck_assert_mem_eq(buff, fromhex(sqrtneg1), 32);
+}
+END_TEST
+
+
+START_TEST(test_xmr_curve25519_tests)
+{
+	static const struct {
+		char *a;
+		int res_neg;
+		int res_nonzero;
+	} tests[] = {
+			{
+				"0000000000000000000000000000000000000000000000000000000000000000",
+				0, 0,
+			},
+			{
+				"0100000000000000000000000000000000000000000000000000000000000000",
+				1, 1,
+			},
+			{
+				"05737aa6100ee54283dc0d483b8e39e61846f6b3736908243d0c824d250b3139",
+				1, 1,
+			},
+			{
+				"95587a5ef6900fa8e32d6a41bd8090b1e33e694284323d1d1f02d69865f2bc15",
+				1, 1,
+			},
+			{
+				"02587a5ef6900fa8e32d6a41bd8090b1e33e694284323d1d1f02d69865f2bc15",
+				0, 1,
+			},
+
+	};
+
+	unsigned char buff[32];
+	bignum25519 a = {0}, b = {0};
+
+	for (size_t i = 0; i < (sizeof(tests) / sizeof(*tests)); i++) {
+		curve25519_expand(a, fromhex(tests[i].a));
+		ck_assert_int_eq(curve25519_isnegative(a), tests[i].res_neg);
+		ck_assert_int_eq(curve25519_isnonzero(a), tests[i].res_nonzero);
+	}
+}
+END_TEST
+
+
+START_TEST(test_xmr_curve25519_expand_reduce)
+{
+	static const struct {
+		char *a;
+		char *b;
+	} tests[] = {
+			{
+				"dec0adde00000000000000000000000000000000000000000000000000000000",
+				"dec0adde00000000000000000000000000000000000000000000000000000000"
+			},
+			{
+				"95587a5ef6900fa8e32d6a41bd8090b1e33e694284323d1d1f02d69865f2bc15",
+				"95587a5ef6900fa8e32d6a41bd8090b1e33e694284323d1d1f02d69865f2bc15"
+			},
+			{
+				"95587a5ef6900fa8e32d6a41bd8090b1e33e694284323d1d1f02d69865f2bcff",
+				"a8587a5ef6900fa8e32d6a41bd8090b1e33e694284323d1d1f02d69865f2bc7f"
+			},
+			{
+				"95587a5ef6900fa8e32d6affbd8090b1e33e694284323fffff02d69865f2bcff",
+				"a8587a5ef6900fa8e32d6affbd8090b1e33e694284323fffff02d69865f2bc7f"
+			},
+
+	};
+
+	unsigned char buff[32];
+	bignum25519 a = {0}, b = {0};
+
+	for (size_t i = 0; i < (sizeof(tests) / sizeof(*tests)); i++) {
+		curve25519_expand_reduce(a, fromhex(tests[i].a));
+		curve25519_contract(buff, a);
+		ck_assert_mem_eq(buff, fromhex(tests[i].b), 32);
+	}
+
+}
+END_TEST
+
+
+START_TEST(test_xmr_ge25519_check)
+{
+	static const struct {
+		char *x;
+		char *y;
+		char *z;
+		char *t;
+		int r;
+		int r2;
+	} tests[] = {
+			{
+				"4ff97748221f954414f836d84e8e7e207786bcd20eb67044756dca307e792c60",
+				"2c7be86ab07488ba43e8e03d85a67625cfbf98c8544de4c877241b7aaafc7f63",
+				"0100000000000000000000000000000000000000000000000000000000000000",
+				"3ec65b03954ce7432525b9b3f4a9f5747f57b40903d1bf8892527366325fe036", 1, 1
+			},
+			{
+				"358fd25e4b84397d207e23cf3a75819bd6b2254cabc990b31ad63873cc38fc7c",
+				"ca48045f790145a1eec3946dfd73747fde0fdb4238607e0a203f8ef5bef90e0e",
+				"0100000000000000000000000000000000000000000000000000000000000000",
+				"6c5e5cbae4b05e149d0aca50bf7b4112acbbe6233ace9c8bd5bcedf34df9ce0b", 1, 1
+			},
+			{
+				"4ff97748221f954414f836d84e8e7e207786bcd20eb6704475ffca307e792c60",
+				"2c7be86ab07488ba43e8e03d85a67625cfbf98c8544de4c877241b7aaafc7f63",
+				"0100000000000000000000000000000000000000000000000000000000000000",
+				"3ec65b03954ce7432525b9b3f4a9f5747f57b40903d1bf8892527366325fe036", 0, 0
+			},
+			{
+				"358fd25e4b84397d207e23cf3a75819bd6b2254cabc990b31ad63873cc38fc7c",
+				"ca48045f790145a1eec3946dfd73747fdfffdb4238607e0a203f8ef5bef90e0e",
+				"0100000000000000000000000000000000000000000000000000000000000000",
+				"6c5e5cbae4b05e149d0aca50bf7b4112acbbe6233ace9c8bd5bcedf34df9ce0b", 0, 1
+			},
+			{
+				"358fd25e4b84397d207e23cf3a75819bd6b2254cabc990b31ad63873cc38fc7c",
+				"ca48045f790145a1eec3946dfd73747fdfffdb4238607e0a203f8ef5bef90e0e",
+				"0100000000000000000000000000000000000000000000000000000000000000",
+				"6c5e5ffae4b05e149d0aca50bf7b4112acbbe6233ace9c8bd5bcedf34df9ce0b", 0, 1
+			},
+
+	};
+
+	unsigned char buff[32];
+	struct ge25519_t p;
+
+	for (size_t i = 0; i < (sizeof(tests) / sizeof(*tests)); i++) {
+		curve25519_expand_reduce(p.x, fromhex(tests[i].x));
+		curve25519_expand_reduce(p.y, fromhex(tests[i].y));
+		curve25519_expand_reduce(p.z, fromhex(tests[i].z));
+		curve25519_expand_reduce(p.t, fromhex(tests[i].t));
+
+		ck_assert_int_eq(ge25519_check(&p), tests[i].r);
+		ck_assert_int_eq(ge25519_fromfe_check(&p), tests[i].r2);
+	}
+}
+END_TEST
+
+
+START_TEST(test_xmr_ge25519_ops)
+{
+	int tests[] = {1, 2, 7, 8, 637, 9912, 12345};
+	for (size_t i = 0; i < (sizeof(tests) / sizeof(*tests)); i++) {
+		struct ge25519_t a, b, c, d;
+		bignum256modm s1 = {0}, s2 = {0}, s3 = {0};
+
+		set256_modm(s1, tests[i]);
+		set256_modm(s2, 8 * tests[i]);
+		set256_modm(s3, 8);
+
+		ge25519_scalarmult_base_wrapper(&a, s1);
+		ge25519_mul8(&b, &a);
+		ge25519_scalarmult_base_wrapper(&c, s2);
+		ck_assert_int_eq(ge25519_eq(&b, &c), 1);
+
+		ge25519_scalarmult_wrapper(&d, &a, s3);
+		ck_assert_int_eq(ge25519_eq(&d, &c), 1);
+
+		ge25519_copy(&a, &b);
+		ge25519_neg_full(&b);
+		ck_assert_int_eq(ge25519_eq(&b, &c), 0);
+
+		ge25519_add(&c, &a, &b, 0);
+		set256_modm(s2, 0);
+		ge25519_scalarmult_base_wrapper(&a, s2);
+		ck_assert_int_eq(ge25519_eq(&a, &c), 1);
+	}
+}
+END_TEST
+
+
+START_TEST(test_xmr_check_point)
+{
+	static const struct {
+		char *p;
+		bool on;
+	} tests[] = {
+			{"001000a93e0e6937b4feaf079e418a028ca85459aa39ac3871b94076f88ca608", true},
+			{"54863a0464c008acc99cffb179bc6cf34eb1bbdf6c29f7a070a7c6376ae30ab5", true},
+			{"bebe3c84092c0f7a92704cafb16562cc45c47f45e84baec8d4bba3559d1c1808", true},
+			{"00000000000000c60073ec000000000000ff0000000000000000000000000080", false},
+			{"00000000000000004e0000000000000000000000000000000000000000000000", false},
+			{"0000008b0000000000000000b200000000000000000000000000000000000080", false},
+			{"a0953eebe2f676256c37af4f6f84f32d397aaf3b73606e96c5ddfcecbb1ceec8", false},
+			{"a82cd837efee505ec8425769ea925bee869ec3c78a57708c64c2ef2bd6ad3b88", false},
+			{"031c56cfc99758f6f025630e77c6dea0b853c3ab0bf6cf8c8dab03d1a4618178", false},
+	};
+
+	ge25519 tmp = {0};
+	for (size_t i = 0; i < (sizeof(tests) / sizeof(*tests)); i++) {
+		int res = ge25519_unpack_negative_vartime(&tmp, fromhex(tests[i].p));
+		ck_assert_int_eq(ge25519_check(&tmp), tests[i].on);
+		ck_assert_int_eq(res, tests[i].on);
+	}
+}
+END_TEST
+
+
+START_TEST(test_xmr_h)
+{
+	char *H = "8b655970153799af2aeadc9ff1add0ea6c7251d54154cfa92c173a0dd39c1f94";
+	ge25519 H2, Z;
+	ge25519_p1p1 P_11;
+	ge25519_pniels P_ni;
+	uint8_t buff[32] = {0};
+	uint8_t buff2[32] = {0};
+
+	ge25519_pack(buff, &xmr_h);
+	ck_assert_mem_eq(buff, fromhex(H), 32);
+
+	int res = ge25519_unpack_vartime(&H2, buff);
+	ck_assert_int_eq(res, 1);
+	ck_assert_int_eq(ge25519_eq(&xmr_h, &xmr_h), 1);
+	ck_assert_int_eq(ge25519_eq(&H2, &xmr_h), 1);
+
+	res = ge25519_unpack_negative_vartime(&H2, buff);
+	ck_assert_int_eq(res, 1);
+	ck_assert_int_eq(ge25519_eq(&H2, &xmr_h), 0);
+	ge25519_neg_full(&H2);
+	ck_assert_int_eq(ge25519_eq(&H2, &xmr_h), 1);
+
+	ge25519_full_to_pniels(&P_ni, &xmr_h);
+	ge25519_pnielsadd_p1p1(&P_11, &H2, &P_ni, 1);
+	ge25519_p1p1_to_full(&H2, &P_11);
+	ge25519_set_neutral(&Z);
+	ck_assert_int_eq(ge25519_eq(&Z, &H2), 1);
+}
+END_TEST
+
+
+START_TEST(test_xmr_hash_to_scalar)
+{
+	bignum256modm a1;
+	unsigned char out[32];
+	char tests[][2][65] = {
+			{"",                                                                 "4a078e76cd41a3d3b534b83dc6f2ea2de500b653ca82273b7bfad8045d85a400"},
+			{"00",                                                               "5497c9b6a7059553835f85118dc089d66512f7b477d66591ff96a9e064bcc90a"},
+			{"000102",                                                           "5727ca206dbafa2e099b022ed528f5bdf7874e3ec09c8f012159dfeeaab2b106"},
+			{"000102030405",                                                     "7740cf04577c107153a50b3abe44859f5245d3d545c6cbf5052e80258ae80607"},
+			{"000102030406",                                                     "ad6bbffaceb8020543ac82bcadb9d090b553ca1260035eae982d669ff6494f02"},
+			{"000102030407",                                                     "d2e116e9576ee5a29011c8fcb41259f99e6933b1d3bb660d0a9ac54e12e5cd06"},
+			{"259ef2aba8feb473cf39058a0fe30b9ff6d245b42b6826687ebd6b63128aff64", "3d6d3727dc50bca39e6ccfc9c12950eef5845e4278565d17f95559513a244d02"},
+			{"44caa1c26187afe8dacc5d91cb8a51282334d9308a818fe4d3607275e2a61f05", "aecc45c83f0408c96c70f8273e94f930edfbd3cd98896a0e57b1b5929fa5ff0b"},
+	};
+
+	for (size_t i = 0; i < (sizeof(tests) / sizeof(*tests)); i++) {
+		xmr_hash_to_scalar(a1, fromhex(tests[i][0]), strlen(tests[i][0]) / 2);
+		contract256_modm(out, a1);
+		ck_assert_mem_eq(out, fromhex(tests[i][1]), 32);
+	}
+}
+END_TEST
+
+
+START_TEST(test_xmr_hash_to_ec)
+{
+	ge25519 p1;
+	unsigned char out[32];
+	char tests[][2][65] = {
+			{"",                                                                 "d6d7d783ab18e1be65586adb7902a4175b737ef0b902875e1d1d5c5cf0478c0b"},
+			{"00",                                                               "8e2fecb36320bc4e192e10ef54afc7c83fbeb0c38b7debd4fea51301f0bd4f3d"},
+			{"000102",                                                           "73b233e2e75d81b9657a857e38e7ab2bc3600e5c56622b9fe4b976ff312220fa"},
+			{"000102030405",                                                     "bebe3c84092c0f7a92704cafb16562cc45c47f45e84baec8d4bba3559d1c1808"},
+			{"000102030406",                                                     "525567a6a40a94f2d916bc1efea234bbd3b9162403ec2faba871a90f8d0d487e"},
+			{"000102030407",                                                     "99b1be2a92cbd22b24b48fb7a9daadd4d13a56915c4f6ed696f271ad5bdbc149"},
+			{"42f6835bf83114a1f5f6076fe79bdfa0bd67c74b88f127d54572d3910dd09201", "54863a0464c008acc99cffb179bc6cf34eb1bbdf6c29f7a070a7c6376ae30ab5"},
+			{"44caa1c26187afe8dacc5d91cb8a51282334d9308a818fe4d3607275e2a61f05", "001000a93e0e6937b4feaf079e418a028ca85459aa39ac3871b94076f88ca608"},
+	};
+
+	for (size_t i = 0; i < (sizeof(tests) / sizeof(*tests)); i++) {
+		xmr_hash_to_ec(&p1, fromhex(tests[i][0]), strlen(tests[i][0]) / 2);
+		ge25519_pack(out, &p1);
+		ck_assert_mem_eq(out, fromhex(tests[i][1]), 32);
+	}
+}
+END_TEST
+
 // define test suite and cases
 Suite *test_suite(void)
 {
@@ -4889,10 +5442,6 @@ Suite *test_suite(void)
 	tcase_add_test(tc, test_ed25519_modl_sub);
 	suite_add_tcase(s, tc);
 
-	tc = tcase_create("xmr_base58");
-	tcase_add_test(tc, test_xmr_base58);
-	suite_add_tcase(s, tc);
-
 	tc = tcase_create("ed25519_ge");
 	tcase_add_test(tc, test_ge25519_double_scalarmult_vartime2);
 	suite_add_tcase(s, tc);
@@ -4939,6 +5488,31 @@ Suite *test_suite(void)
 	tcase_add_test(tc, test_cashaddr);
 	suite_add_tcase(s, tc);
 
+	tc = tcase_create("xmr_base58");
+	tcase_add_test(tc, test_xmr_base58);
+	suite_add_tcase(s, tc);
+
+	tc = tcase_create("xmr_crypto");
+	tcase_add_test(tc, test_xmr_getset256_modm);
+	tcase_add_test(tc, test_xmr_cmp256_modm);
+	tcase_add_test(tc, test_xmr_copy_check_modm);
+	tcase_add_test(tc, test_xmr_mulsub256_modm);
+	tcase_add_test(tc, test_xmr_muladd256_modm);
+	tcase_add_test(tc, test_xmr_curve25519_set);
+	tcase_add_test(tc, test_xmr_curve25519_consts);
+	tcase_add_test(tc, test_xmr_curve25519_tests);
+	tcase_add_test(tc, test_xmr_curve25519_expand_reduce);
+	tcase_add_test(tc, test_xmr_ge25519_check);
+	tcase_add_test(tc, test_xmr_ge25519_ops);
+	suite_add_tcase(s, tc);
+
+	tc = tcase_create("xmr_xmr");
+	tcase_add_test(tc, test_xmr_check_point);
+	tcase_add_test(tc, test_xmr_h);
+	tcase_add_test(tc, test_xmr_hash_to_scalar);
+	tcase_add_test(tc, test_xmr_hash_to_ec);
+	suite_add_tcase(s, tc);
+	
 	return s;
 }
 
