@@ -4936,7 +4936,7 @@ START_TEST(test_xmr_curve25519_set)
 	};
 
 	unsigned char buff[32];
-	bignum25519 a = {0}, b = {0};
+	bignum25519 a = {0};
 
 	for (size_t i = 0; i < (sizeof(tests) / sizeof(*tests)); i++) {
 		curve25519_set(a, tests[i].val);
@@ -5001,8 +5001,7 @@ START_TEST(test_xmr_curve25519_tests)
 
 	};
 
-	unsigned char buff[32];
-	bignum25519 a = {0}, b = {0};
+	bignum25519 a = {0};
 
 	for (size_t i = 0; i < (sizeof(tests) / sizeof(*tests)); i++) {
 		curve25519_expand(a, fromhex(tests[i].a));
@@ -5039,7 +5038,7 @@ START_TEST(test_xmr_curve25519_expand_reduce)
 	};
 
 	unsigned char buff[32];
-	bignum25519 a = {0}, b = {0};
+	bignum25519 a = {0};
 
 	for (size_t i = 0; i < (sizeof(tests) / sizeof(*tests)); i++) {
 		curve25519_expand_reduce(a, fromhex(tests[i].a));
@@ -5094,7 +5093,6 @@ START_TEST(test_xmr_ge25519_check)
 
 	};
 
-	unsigned char buff[32];
 	struct ge25519_t p;
 
 	for (size_t i = 0; i < (sizeof(tests) / sizeof(*tests)); i++) {
@@ -5159,7 +5157,7 @@ START_TEST(test_xmr_check_point)
 			{"031c56cfc99758f6f025630e77c6dea0b853c3ab0bf6cf8c8dab03d1a4618178", false},
 	};
 
-	ge25519 tmp = {0};
+	ge25519 tmp;
 	for (size_t i = 0; i < (sizeof(tests) / sizeof(*tests)); i++) {
 		int res = ge25519_unpack_negative_vartime(&tmp, fromhex(tests[i].p));
 		ck_assert_int_eq(ge25519_check(&tmp), tests[i].on);
@@ -5176,7 +5174,6 @@ START_TEST(test_xmr_h)
 	ge25519_p1p1 P_11;
 	ge25519_pniels P_ni;
 	uint8_t buff[32] = {0};
-	uint8_t buff2[32] = {0};
 
 	ge25519_pack(buff, &xmr_h);
 	ck_assert_mem_eq(buff, fromhex(H), 32);
