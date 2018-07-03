@@ -124,13 +124,11 @@ void copy256_modm(bignum256modm r, const bignum256modm x){
 
 int check256_modm(const bignum256modm x){
 	int ok = 1;
-	bignum256modm t={0};
+	bignum256modm t={0}, z={0};
 
 	ok &= iszero256_modm(x) ^ 1;
-	copy256_modm(t, x);
-	reduce256_modm(t);
+	barrett_reduce256_modm(t, z, x);
 	ok &= eq256_modm(t, x);
-
 	return ok;
 }
 
