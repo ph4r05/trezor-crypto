@@ -5682,6 +5682,82 @@ START_TEST(test_xmr_add_keys3)
 END_TEST
 
 
+START_TEST(test_xmr_get_subaddress_secret_key)
+{
+	static const struct {
+		uint32_t major, minor;
+		char *m;
+		char *r;
+	} tests[] = {
+		{
+			0, 0,
+			"36fad9f7bff465c15a755f1482fb2ecc3a4e434303df906882234e42b5813207",
+			"8a510a9fe1824b49abbae05958084f9c9098775f29e15427309177882471cf01",
+		},
+		{
+			0, 1,
+			"36fad9f7bff465c15a755f1482fb2ecc3a4e434303df906882234e42b5813207",
+			"2bbc9366c04abb0523e2b2d6e709670ffe6645bacedfee968d9c6bc8eefe9c0f",
+		},
+		{
+			100, 100,
+			"36fad9f7bff465c15a755f1482fb2ecc3a4e434303df906882234e42b5813207",
+			"c3837d41fedeaed126cf4fc1a5ea47b8b7f38f6a64aa534e3dd45a3c93f37600",
+		},
+	};
+
+	bignum256modm m, res, res_exp;
+
+	for (size_t i = 0; i < (sizeof(tests) / sizeof(*tests)); i++) {
+		expand256_modm(m, fromhex(tests[i].m), 32);
+		expand256_modm(res_exp, fromhex(tests[i].r), 32);
+		xmr_get_subaddress_secret_key(res, tests[i].major, tests[i].minor, m);
+
+		ck_assert_int_eq(eq256_modm(res, res_exp), 1);
+		ck_assert_int_eq(eq256_modm(res, m), 0);
+	}
+}
+END_TEST
+
+
+START_TEST(test_xmr_gen_c)
+{
+	static const struct {
+		char *a;
+		uint64_t amount;
+		char *r;
+	} tests[] = {
+		{
+			"e3e6558c291bbb98aa691d068b67d59dc520afb23fdd51bf65283626fc2ad903", 0,
+			"ef19d73bdf3749240b80ee7695f53ad7c2fc2cf868a93209799f41212d099750",
+		},
+		{
+			"6788c9579c377f3228680bd0e6d01b1ee0c763b35ed39d36fa2146cc2ee16e0e", 1,
+			"4913b9af4f2725d87a4404c22cf366597d1c1e6a1f510ae14081d8b7c5a9de77",
+		},
+		{
+			"ad9e89d67012935540427c241756d6a9d260c5e134603c41d31e24f8651bef08", 65537,
+			"f005721da08f24e68314abed3ddfd94165e4be3813398fb126e3f366820b9c90",
+		},
+		{
+			"fdbb70ff07be24d98de3bffa0a33756646497224318fb7fe136f0e7789d12607", 0xffffffffffffffffULL,
+			"a9c38927f299c5f14c98a1a9c9981e59c606ff597274b9b709e1356f12e1498c",
+		},
+	};
+
+	bignum256modm a;
+	ge25519 res, res_exp;
+
+	for (size_t i = 0; i < (sizeof(tests) / sizeof(*tests)); i++) {
+		expand256_modm(a, fromhex(tests[i].a), 32);
+		ge25519_unpack_vartime(&res_exp, fromhex(tests[i].r));
+		xmr_gen_c(&res, a, tests[i].amount);
+
+		ck_assert_int_eq(ge25519_eq(&res, &res_exp), 1);
+	}
+}
+END_TEST
+
 
 // define test suite and cases
 Suite *test_suite(void)
