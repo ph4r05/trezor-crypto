@@ -5305,6 +5305,28 @@ START_TEST(test_xmr_h)
 END_TEST
 
 
+START_TEST(test_xmr_fast_hash)
+	{
+		uint8_t hash[32];
+		char tests[][2][65] = {
+			{"",                                                                 "c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470"},
+			{"00",                                                               "bc36789e7a1e281436464229828f817d6612f7b477d66591ff96a9e064bcc98a"},
+			{"000102",                                                           "f84a97f1f0a956e738abd85c2e0a5026f8874e3ec09c8f012159dfeeaab2b156"},
+			{"000102030405",                                                     "51e8babe8b42352100dffa7f7b3843c95245d3d545c6cbf5052e80258ae80627"},
+			{"000102030406",                                                     "74e7a0111ee2390dc68269a549a76dcfb553ca1260035eae982d669ff6494f32"},
+			{"000102030407",                                                     "3a81c5d02a87786343f88414aae150a09f6933b1d3bb660d0a9ac54e12e5cd86"},
+			{"259ef2aba8feb473cf39058a0fe30b9ff6d245b42b6826687ebd6b63128aff64", "7fb4d1c8e32f7414fe8c7b2774ec05bff6845e4278565d17f95559513a244da2"},
+			{"44caa1c26187afe8dacc5d91cb8a51282334d9308a818fe4d3607275e2a61f05", "2998fe52f8b9883149babd9c546912c3edfbd3cd98896a0e57b1b5929fa5ff7b"},
+		};
+
+		for (size_t i = 0; i < (sizeof(tests) / sizeof(*tests)); i++) {
+			xmr_fast_hash(hash, fromhex(tests[i][0]), strlen(tests[i][0]) / 2);
+			ck_assert_mem_eq(hash, fromhex(tests[i][1]), 32);
+		}
+	}
+END_TEST
+
+
 START_TEST(test_xmr_hash_to_scalar)
 {
 	bignum256modm a1;
@@ -5615,6 +5637,7 @@ Suite *test_suite(void)
 	tc = tcase_create("xmr_xmr");
 	tcase_add_test(tc, test_xmr_check_point);
 	tcase_add_test(tc, test_xmr_h);
+	tcase_add_test(tc, test_xmr_fast_hash);
 	tcase_add_test(tc, test_xmr_hash_to_scalar);
 	tcase_add_test(tc, test_xmr_hash_to_ec);
 	suite_add_tcase(s, tc);
