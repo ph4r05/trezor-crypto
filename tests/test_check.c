@@ -5154,6 +5154,64 @@ START_TEST(test_xmr_ge25519_scalarmult_base_wrapper_check)
 END_TEST
 
 
+START_TEST(test_xmr_ge25519_scalarmult_wrapper_check)
+{
+	static const struct {
+		char *sc;
+		char *pt;
+		char *pt2;
+	} tests[] = {
+			{
+				"0000000000000000000000000000000000000000000000000000000000000000",
+				"5cbb3b2784c16f0e7eb4f2a7f93288552bb24ec51c5e01504c1e6885cfbca6d0",
+				"0100000000000000000000000000000000000000000000000000000000000000",
+			},
+			{
+				"0100000000000000000000000000000000000000000000000000000000000000",
+				"f39b6770008d069acb92eb95329dec2cb0054da024e437a1bdf1ae06527deff6",
+				"f39b6770008d069acb92eb95329dec2cb0054da024e437a1bdf1ae06527deff6",
+			},
+			{
+				"3930000000000000000000000000000000000000000000000000000000000000",
+				"2835b3983e3cc01a640fd188bf6bbbafbf997a3344d800eed22e4e82a412941c",
+				"2fe8b2dd0f23e02fca6989e170135584d684583c0a44f6a7d3ebd964685d36c7",
+			},
+			{
+				"ffffffffffffffff000000000000000000000000000000000000000000000000",
+				"bb8af7a53a8f1b477c810e833a84cdc789a6b81a6b6417be4f97ffd9ae0fe0b8",
+				"3a5c9a7dacca9dd8827881f38c36aad7d402a5efc2cab58c7553b903876e1491",
+			},
+			{
+				"864203a09e1c788a482685c739af07355ebb2c840b7de6af87eff5f19ee3b807",
+				"d404a9bbf351e7320ea6d11cdeeccaf505f706731cb5e5d839b950edb7ba6286",
+				"11e09c89e0be7663e0e2d4a01fb05d6a3fd84a78a6fa4fd7daaacf2d19311a38",
+			},
+			{
+				"3e01f05920a238e33766814d10f0c3a3e975072399ad90a823d4808db1d85209",
+				"52a2d35798a0ac209b8fa194fe398b869aba5f20d80ee3d8ca77759a8e0bae0d",
+				"4256addc2f036150f3fdc0a7905f01285239d6dd4eecc4be8e3b134eef4639fe",
+			},
+			{
+				"ad63d591716a9e89a024a074bc6ce661268d1bb3665f91e8b981f189b1a49507",
+				"3928bde7a92e1341c3dfee35a66fa5639204f5b9747963278af430145028648d",
+				"9c959003ba91004956df98800a5024d94031db5ac659675b26350657d93c34f9",
+			},
+	};
+
+	ge25519 pt, pt2, pt3;
+	bignum256modm sc;
+
+	for (size_t i = 0; i < (sizeof(tests) / sizeof(*tests)); i++) {
+		expand256_modm(sc, fromhex(tests[i].sc), 32);
+		ge25519_unpack_vartime(&pt, fromhex(tests[i].pt));
+		ge25519_unpack_vartime(&pt2, fromhex(tests[i].pt2));
+		ge25519_scalarmult_wrapper(&pt3, &pt, sc);
+		ck_assert_int_eq(ge25519_eq(&pt3, &pt2), 1);
+	}
+}
+END_TEST
+
+
 START_TEST(test_xmr_ge25519_ops)
 {
 	int tests[] = {1, 2, 7, 8, 637, 9912, 12345};
@@ -5547,6 +5605,7 @@ Suite *test_suite(void)
 	tcase_add_test(tc, test_xmr_curve25519_expand_reduce);
 	tcase_add_test(tc, test_xmr_ge25519_check);
 	tcase_add_test(tc, test_xmr_ge25519_scalarmult_base_wrapper_check);
+	tcase_add_test(tc, test_xmr_ge25519_scalarmult_wrapper_check);
 	tcase_add_test(tc, test_xmr_ge25519_ops);
 	suite_add_tcase(s, tc);
 
