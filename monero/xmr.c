@@ -139,13 +139,16 @@ void xmr_add_keys3_vartime(ge25519 * r, const bignum256modm a, const ge25519 * A
 
 void xmr_get_subaddress_secret_key(bignum256modm r, uint32_t major, uint32_t minor, const bignum256modm m){
 	const char prefix[] = "SubAddr";
+	unsigned char buff[32];
+	contract256_modm(buff, m);
+
 	char data[sizeof(prefix) + sizeof(bignum256modm) + 2 * sizeof(uint32_t)];
 	memcpy(data, prefix, sizeof(prefix));
-	memcpy(data + sizeof(prefix), &m, sizeof(bignum256modm));
+	memcpy(data + sizeof(prefix), buff, sizeof(buff));
 	uint32_t idx = SWAP32LE(major);
-	memcpy(data + sizeof(prefix) + sizeof(bignum256modm), &idx, sizeof(uint32_t));
+	memcpy(data + sizeof(prefix) + sizeof(buff), &idx, sizeof(uint32_t));
 	idx = SWAP32LE(minor);
-	memcpy(data + sizeof(prefix) + sizeof(bignum256modm) + sizeof(uint32_t), &idx, sizeof(uint32_t));
+	memcpy(data + sizeof(prefix) + sizeof(buff) + sizeof(uint32_t), &idx, sizeof(uint32_t));
 
 	xmr_hash_to_scalar(r, data, sizeof(data));
 }
