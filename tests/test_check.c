@@ -5053,6 +5053,18 @@ START_TEST(test_xmr_curve25519_expand_reduce)
 END_TEST
 
 
+START_TEST(test_xmr_ge25519_base)
+{
+	unsigned char buff[32];
+	char *base = "5866666666666666666666666666666666666666666666666666666666666666";
+	ge25519 b;
+	ge25519_set_base(&b);
+	ge25519_pack(buff, &b);
+	ck_assert_mem_eq(buff, fromhex(base), 32);
+}
+END_TEST
+
+
 START_TEST(test_xmr_ge25519_check)
 {
 	static const struct {
@@ -5628,6 +5640,7 @@ Suite *test_suite(void)
 	tcase_add_test(tc, test_xmr_curve25519_consts);
 	tcase_add_test(tc, test_xmr_curve25519_tests);
 	tcase_add_test(tc, test_xmr_curve25519_expand_reduce);
+	tcase_add_test(tc, test_xmr_ge25519_base);
 	tcase_add_test(tc, test_xmr_ge25519_check);
 	tcase_add_test(tc, test_xmr_ge25519_scalarmult_base_wrapper);
 	tcase_add_test(tc, test_xmr_ge25519_scalarmult_wrapper);
