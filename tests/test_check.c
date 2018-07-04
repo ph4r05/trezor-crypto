@@ -5754,6 +5754,67 @@ START_TEST(test_xmr_gen_c)
 END_TEST
 
 
+START_TEST(test_xmr_varint)
+{
+	static const struct {
+		uint64_t x;
+		char *r;
+	} tests[] = {
+		{
+			0,
+			"00",
+		},
+		{
+			24,
+			"18",
+		},
+		{
+			65535,
+			"ffff03",
+		},
+		{
+			65537,
+			"818004",
+		},
+		{
+			0x7fffffffULL,
+			"ffffffff07",
+		},
+		{
+			0xffffffffULL,
+			"ffffffff0f",
+		},
+		{
+			0xffffffffffffffffULL,
+			"ffffffffffffffffff01",
+		},
+		{
+			0xdeadc0deULL,
+			"de81b7f50d",
+		},
+	};
+
+	uint64_t val;
+	unsigned char buff[64];
+
+	for (size_t i = 0; i < (sizeof(tests) / sizeof(*tests)); i++) {
+		int s1 = xmr_size_varint(tests[i].x);
+		int written = 0;
+		int read = 0;
+
+		ck_assert_int_eq(s1, strlen(tests[i].r)/2);
+		written = xmr_write_varint(buff, sizeof(buff), tests[i].x);
+		ck_assert_int_eq(s1, written);
+		ck_assert_mem_eq(buff, fromhex(tests[i].r), strlen(tests[i].r)/2);
+
+		read = xmr_read_varint(buff, sizeof(buff), &val);
+		ck_assert_int_eq(read, written);
+		ck_assert(tests[i].x == val);
+	}
+}
+END_TEST
+
+
 // define test suite and cases
 Suite *test_suite(void)
 {
@@ -6030,6 +6091,7 @@ Suite *test_suite(void)
 	tcase_add_test(tc, test_xmr_add_keys3);
 	tcase_add_test(tc, test_xmr_get_subaddress_secret_key);
 	tcase_add_test(tc, test_xmr_gen_c);
+	tcase_add_test(tc, test_xmr_varint);
 	suite_add_tcase(s, tc);
 	
 	return s;
