@@ -4651,7 +4651,7 @@ END_TEST
 
 #include "test_check_cashaddr.h"
 
-
+#if USE_MONERO
 START_TEST(test_xmr_base58)
 {
 	static const struct {
@@ -5866,7 +5866,7 @@ START_TEST(test_xmr_gen_range_sig)
 	}
 }
 END_TEST
-
+#endif
 
 // define test suite and cases
 Suite *test_suite(void)
@@ -6108,6 +6108,7 @@ Suite *test_suite(void)
 	tcase_add_test(tc, test_cashaddr);
 	suite_add_tcase(s, tc);
 
+#if USE_MONERO
 	tc = tcase_create("xmr_base58");
 	tcase_add_test(tc, test_xmr_base58);
 	suite_add_tcase(s, tc);
@@ -6147,7 +6148,7 @@ Suite *test_suite(void)
 	tcase_add_test(tc, test_xmr_varint);
 	tcase_add_test(tc, test_xmr_gen_range_sig);
 	suite_add_tcase(s, tc);
-	
+#endif
 	return s;
 }
 
