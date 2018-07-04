@@ -5532,11 +5532,51 @@ START_TEST(test_xmr_derive_private_key)
 
 		xmr_derive_private_key(res, &pt, tests[i].idx, base);
 		ck_assert_int_eq(eq256_modm(res, res_exp), 1);
-		ck_assert_int_eq(ge25519_eq(res, base), 0);
+		ck_assert_int_eq(eq256_modm(res, base), 0);
 	}
 }
 END_TEST
 
+
+START_TEST(test_xmr_derive_public_key)
+{
+	static const struct {
+		char *pt;
+		uint32_t idx;
+		char *base;
+		char *r;
+	} tests[] = {
+		{
+			"653f03e7766d472826aa49793bc0cfde698e6745ae5e4217980ba307739f2ed9", 0,
+			"2a393f0858732970ac8dea003b17e1ce9371f0a045bd9b7af0d998262739f4cc",
+			"f7a3db27c45f265f6a68a30137ca44289a6cf1a6db2cf482c59ebfb0142ad419",
+		},
+		{
+			"338e93f61e6470a5cc71c07b8caedd1a9a28da037aab65c1ca5538501b012c81", 1,
+			"af3a1d39397d778731c4510110fd117dc02f756e390713d58f94a06203ce39eb",
+			"779e2a043c881f06aba1952741fd753098615c4fafa8f62748467ab9bac43241",
+		},
+		{
+			"7735e9476440927b89b18d7a1e0645b218a1a6d28c642aebb16c1dba0926d5e4", 65537,
+			"62c3eed062bd602f7f2164c69ad0b5a8eb3ea560c930f6b41abfc1c4839ea432",
+			"6da4ebd29498d16c4e813abb3e328c83f9b01a7ba1da6e818071f8ec563626c8",
+		},
+	};
+
+	ge25519 pt, base, res, res_exp;
+
+	for (size_t i = 0; i < (sizeof(tests) / sizeof(*tests)); i++) {
+		ge25519_unpack_vartime(&pt, fromhex(tests[i].pt));
+		ge25519_unpack_vartime(&base, fromhex(tests[i].base));
+		ge25519_unpack_vartime(&res_exp, fromhex(tests[i].r));
+
+		xmr_derive_public_key(&res, &pt, tests[i].idx, &base);
+
+		ck_assert_int_eq(ge25519_eq(&res, &res_exp), 1);
+		ck_assert_int_eq(ge25519_eq(&res, &base), 0);
+	}
+}
+END_TEST
 
 
 
@@ -5813,6 +5853,7 @@ Suite *test_suite(void)
 	tcase_add_test(tc, test_xmr_derivation_to_scalar);
 	tcase_add_test(tc, test_xmr_generate_key_derivation);
 	tcase_add_test(tc, test_xmr_derive_private_key);
+	tcase_add_test(tc, test_xmr_derive_public_key);
 	suite_add_tcase(s, tc);
 	
 	return s;
