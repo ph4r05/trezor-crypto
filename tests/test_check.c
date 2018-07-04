@@ -4781,13 +4781,16 @@ START_TEST(test_xmr_cmp256_modm)
 				"0e4005c7826de8f9978749903f40efd140e4ae6d3bed09e558fcce8367b27504",
 				0, -1, 0
 			},
-
 			{
 				"0e4005c7826de8f9978749903f40efd140e4ae6d3bed09e558fcce8367b27504",
 				"0e4005c7826de8f9978749903f40efd140e4ae6d3bed09e558fcce8367b27504",
 				1, 0,  0
 			},
-
+		  {
+				"0e4005c7826de8f9978749903f40efd140e4ae6d3bed09e558fcce8367b27504",
+				"0e4005c7826de8f9978749903f41efd140e4ae6d3bed09e558fcce8367b27504",
+				0, -1,  0
+			},
 	};
 
 	bignum256modm a1 = {0}, a2 = {0};
