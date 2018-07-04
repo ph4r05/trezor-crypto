@@ -142,7 +142,7 @@ void xmr_get_subaddress_secret_key(bignum256modm r, uint32_t major, uint32_t min
 	unsigned char buff[32];
 	contract256_modm(buff, m);
 
-	char data[sizeof(prefix) + sizeof(bignum256modm) + 2 * sizeof(uint32_t)];
+	char data[sizeof(prefix) + sizeof(buff) + 2 * sizeof(uint32_t)];
 	memcpy(data, prefix, sizeof(prefix));
 	memcpy(data + sizeof(prefix), buff, sizeof(buff));
 	uint32_t idx = SWAP32LE(major);

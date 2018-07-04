@@ -5957,6 +5957,8 @@ Suite *test_suite(void)
 	tcase_add_test(tc, test_xmr_derive_public_key);
 	tcase_add_test(tc, test_xmr_add_keys2);
 	tcase_add_test(tc, test_xmr_add_keys3);
+	tcase_add_test(tc, test_xmr_get_subaddress_secret_key);
+	tcase_add_test(tc, test_xmr_gen_c);
 	suite_add_tcase(s, tc);
 	
 	return s;
