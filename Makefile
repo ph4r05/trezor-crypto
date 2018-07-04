@@ -54,7 +54,6 @@ SRCS  += monero/serialize.c
 SRCS  += monero/crypto.c
 SRCS  += monero/xmr.c
 SRCS  += monero/range_proof.c
-SRCS  += monero/monero.c
 SRCS  += blake256.c
 SRCS  += blake2b.c blake2s.c
 SRCS  += groestl.c
