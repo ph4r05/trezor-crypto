@@ -5458,6 +5458,90 @@ START_TEST(test_xmr_derivation_to_scalar)
 END_TEST
 
 
+START_TEST(test_xmr_generate_key_derivation)
+{
+	static const struct {
+		char *pt;
+		char *sc;
+		char *r;
+	} tests[] = {
+		{
+			"38f94f27c8037aff025e365275ed1029fd636dda5f69e5f98fdcf92e0a28f31a",
+			"8f1c73ee5327a43264a7b60b9e7882312b582f33e89846a8694dbf094bb3a90a",
+			"1fbfe4dcc8c824c274649545f297fa320cd4c1689b1d0ff4887567c4d4a75649",
+		},
+		{
+			"26785c3941a32f194228eb659c5ee305e63868896defc50ee6c4e0e92d1e246a",
+			"dbbffec4686ba8ab25e2f1b04c0e7ae51c5143c91353bfb5998430ebe365a609",
+			"cca34db8dd682ec164d8973b555253934596b77849ef7709d9321121c25aba02",
+		},
+		{
+			"43505a8ce7248f70d3aae4f57fb59c254ce2b2a0cc2bcf50f2344e51d59b36b3",
+			"19a802e35f6ff94efe96ec016effe04e635bbd9c1ce2612d5ba2ee4659456b06",
+			"fc6c93a93f77ff89c18b9abf95b28ec8591ab97eee8e4afee93aa766a4bd3934",
+		},
+	};
+
+	ge25519 pt, pt2, pt3;
+	bignum256modm sc;
+
+	for (size_t i = 0; i < (sizeof(tests) / sizeof(*tests)); i++) {
+		expand256_modm(sc, fromhex(tests[i].sc), 32);
+		ge25519_unpack_vartime(&pt, fromhex(tests[i].pt));
+		ge25519_unpack_vartime(&pt2, fromhex(tests[i].r));
+		xmr_generate_key_derivation(&pt3, &pt, sc);
+		ck_assert_int_eq(ge25519_eq(&pt3, &pt2), 1);
+		ck_assert_int_eq(ge25519_eq(&pt3, &pt), 0);
+	}
+}
+END_TEST
+
+
+START_TEST(test_xmr_derive_private_key)
+{
+	static const struct {
+		char *pt;
+		uint32_t idx;
+		char *base;
+		char *r;
+	} tests[] = {
+		{
+			"0541d8f069e5e80a892e39bbf1944ef578008cf9ecf1d100760a05858c1b709e", 0,
+			"76967eeb0a3d181bb0b384be71c680a4287599f27b2ddbd07f8e06ab6f2c880e",
+			"45728c5cb658e470790f124a01699d2126832b7e5c6b7760b6f11119b96ad603",
+		},
+		{
+			"fc6e0bd785a84e62c9ac8a97e0e604a79494bc2cf7b3b38ef8af7791c87b5bb8", 1,
+			"32fbe149562b7ccb34bc4105b87b2a834024799336c8eea5e94df77f1ae9a807",
+			"64508e83bbadf63f8ecfae4d9dcdd39a4ba23508a545e1a37026f0fa2539d601",
+		},
+		{
+			"f6bd7a72dc9444dc7e09a0eb4d312d36fe173693d6405b132a5b090297a04ea9", 65537,
+			"333a8fcce6726457e4222a87b9b475c1fcf985f756c2029fcb39184c0a5c4804",
+			"37c16a22da4c0082ebf4bf807403b169f75142a9bd8560ed45f3f9347218260e",
+		},
+	};
+
+	ge25519 pt;
+	bignum256modm base, res, res_exp;
+
+	for (size_t i = 0; i < (sizeof(tests) / sizeof(*tests)); i++) {
+		expand256_modm(base, fromhex(tests[i].base), 32);
+		expand256_modm(res_exp, fromhex(tests[i].r), 32);
+		ge25519_unpack_vartime(&pt, fromhex(tests[i].pt));
+
+		xmr_derive_private_key(res, &pt, tests[i].idx, base);
+		ck_assert_int_eq(eq256_modm(res, res_exp), 1);
+		ck_assert_int_eq(ge25519_eq(res, base), 0);
+	}
+}
+END_TEST
+
+
+
+
+
+
 // define test suite and cases
 Suite *test_suite(void)
 {
@@ -5727,6 +5811,8 @@ Suite *test_suite(void)
 	tcase_add_test(tc, test_xmr_hash_to_scalar);
 	tcase_add_test(tc, test_xmr_hash_to_ec);
 	tcase_add_test(tc, test_xmr_derivation_to_scalar);
+	tcase_add_test(tc, test_xmr_generate_key_derivation);
+	tcase_add_test(tc, test_xmr_derive_private_key);
 	suite_add_tcase(s, tc);
 	
 	return s;
