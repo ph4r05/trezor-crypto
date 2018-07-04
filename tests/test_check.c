@@ -5415,6 +5415,49 @@ START_TEST(test_xmr_hash_to_ec)
 }
 END_TEST
 
+
+START_TEST(test_xmr_derivation_to_scalar)
+{
+	static const struct {
+		char *pt;
+		uint32_t idx;
+		char *sc;
+	} tests[] = {
+		{
+			"c655b2d9d2670a1c9f26f7586b6d6b1ec5173b8b33bca64c3d305a42d66738b1", 0,
+			"ca7ce31b273dd1ac00dc3553e654fb66036804800e27c826bd2b78649243900b",
+		},
+		{
+			"2b1dbd7a007dcc4d729fa8359705595599737fcef60afb36b379fe033095dca7", 1,
+			"60afd5a63b14845d3b92d16eac386713e4ff617fdc5c1a07c3212098c1f5610c",
+		},
+		{
+			"a48ed3797225dab4b4316b5e40107b6bd63e5f4dc517ba602774d703576ec771", 24,
+			"fe81804091e50a5c2233faa6277360fbe1948ea15dddbae62c1d40bbd1918606",
+		},
+		{
+			"fa27b5b39741f5341b4e89269e3a05ff7e76ec7739843872468fc4bec8475410", 65537,
+			"1ba36841f57aa8b799c4dd02b39d53e5fb7780d3f09f91a57a86dcb418d8d506",
+		},
+	};
+
+	ge25519 pt;
+	bignum256modm sc, sc2;
+
+	for (size_t i = 0; i < (sizeof(tests) / sizeof(*tests)); i++) {
+		expand256_modm(sc, fromhex(tests[i].sc), 32);
+		ge25519_unpack_vartime(&pt, fromhex(tests[i].pt));
+
+		xmr_derivation_to_scalar(sc2, &pt, tests[i].idx);
+		ck_assert_int_eq(eq256_modm(sc, sc2), 1);
+
+		xmr_derivation_to_scalar(sc2, &pt, tests[i].idx + 1);
+		ck_assert_int_eq(eq256_modm(sc, sc2), 0);
+	}
+}
+END_TEST
+
+
 // define test suite and cases
 Suite *test_suite(void)
 {
@@ -5683,6 +5726,7 @@ Suite *test_suite(void)
 	tcase_add_test(tc, test_xmr_hasher);
 	tcase_add_test(tc, test_xmr_hash_to_scalar);
 	tcase_add_test(tc, test_xmr_hash_to_ec);
+	tcase_add_test(tc, test_xmr_derivation_to_scalar);
 	suite_add_tcase(s, tc);
 	
 	return s;
