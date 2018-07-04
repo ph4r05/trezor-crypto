@@ -63,7 +63,7 @@ void curve25519_expand_reduce(bignum25519 out, const unsigned char in[32]);
 /* check if r is on curve */
 int ge25519_check(const ge25519 *r);
 
-/* check performed on point coords after unpacking. r has to be normed (z=1) */
+/* check performed on point coords after unpacking. r has to be normed (z=1). (x,y) check only, in ge_frombytes_vartime */
 int ge25519_fromfe_check(const ge25519 *r);
 
 /* a == b */
