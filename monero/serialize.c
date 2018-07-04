@@ -33,6 +33,7 @@ int xmr_write_varint(uint8_t * buff, size_t buff_size, uint64_t num){
 int xmr_read_varint(uint8_t * buff, size_t buff_size, uint64_t *val) {
 	unsigned read = 0;
 	int finished_ok = 0;
+	*val = 0;
 
 	for (int shift = 0; read < buff_size; shift += 7, ++read) {
 		uint8_t byte = buff[read];
@@ -48,6 +49,6 @@ int xmr_read_varint(uint8_t * buff, size_t buff_size, uint64_t *val) {
 			break;
 		}
 	}
-	return finished_ok ? (int)read : -2;
+	return finished_ok ? (int)read + 1 : -2;
 }
 
