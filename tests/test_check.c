@@ -5108,7 +5108,7 @@ START_TEST(test_xmr_ge25519_check)
 END_TEST
 
 
-START_TEST(test_xmr_ge25519_scalarmult_base_wrapper_check)
+START_TEST(test_xmr_ge25519_scalarmult_base_wrapper)
 {
 	static const struct {
 		char *sc;
@@ -5157,7 +5157,7 @@ START_TEST(test_xmr_ge25519_scalarmult_base_wrapper_check)
 END_TEST
 
 
-START_TEST(test_xmr_ge25519_scalarmult_wrapper_check)
+START_TEST(test_xmr_ge25519_scalarmult_wrapper)
 {
 	static const struct {
 		char *sc;
@@ -5607,8 +5607,8 @@ Suite *test_suite(void)
 	tcase_add_test(tc, test_xmr_curve25519_tests);
 	tcase_add_test(tc, test_xmr_curve25519_expand_reduce);
 	tcase_add_test(tc, test_xmr_ge25519_check);
-	tcase_add_test(tc, test_xmr_ge25519_scalarmult_base_wrapper_check);
-	tcase_add_test(tc, test_xmr_ge25519_scalarmult_wrapper_check);
+	tcase_add_test(tc, test_xmr_ge25519_scalarmult_base_wrapper);
+	tcase_add_test(tc, test_xmr_ge25519_scalarmult_wrapper);
 	tcase_add_test(tc, test_xmr_ge25519_ops);
 	suite_add_tcase(s, tc);
 
