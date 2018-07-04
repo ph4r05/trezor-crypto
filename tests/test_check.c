@@ -5108,6 +5108,55 @@ START_TEST(test_xmr_ge25519_check)
 END_TEST
 
 
+START_TEST(test_xmr_ge25519_scalarmult_base_wrapper_check)
+{
+	static const struct {
+		char *sc;
+		char *pt;
+	} tests[] = {
+			{
+				"40be740e26bd1c84f5a8fec737c0ed30e87bd45adfcd91e320f8dfb68b1a870e",
+				"b7a8b2f3dbfd41b38d20aec733a316dbfc2633503799cd36f38570cafc8ea887",
+			},
+			{
+				"1b3746add992215d427e43a58354c11ff9e6dfa1c187250938f7f9334fa41d05",
+				"e2a1bfbe38a9749fe6ede79d923b778fa4c89393473d633bec01fa68617d0828",
+			},
+			{
+				"69af25c54090a9746d3f6043348452429ffd53c1530fa114fd0055b70d61020f",
+				"6bf1783b0a7495d5f6c36605dca95e723ca120a306c255084787f09b12771124",
+			},
+			{
+				"0000000000000000000000000000000000000000000000000000000000000000",
+				"0100000000000000000000000000000000000000000000000000000000000000",
+			},
+			{
+				"0100000000000000000000000000000000000000000000000000000000000000",
+				"5866666666666666666666666666666666666666666666666666666666666666",
+			},
+			{
+				"0800000000000000000000000000000000000000000000000000000000000000",
+				"b4b937fca95b2f1e93e41e62fc3c78818ff38a66096fad6e7973e5c90006d321",
+			},
+			{
+				"ffffffffffffffff000000000000000000000000000000000000000000000000",
+				"e185757a3fdc6519a6e7bebd97aa52bdc999e4c87d5c3aad0d995763ab6c6985",
+			},
+	};
+
+	ge25519 pt, pt2;
+	bignum256modm sc;
+
+	for (size_t i = 0; i < (sizeof(tests) / sizeof(*tests)); i++) {
+		expand256_modm(sc, fromhex(tests[i].sc), 32);
+		ge25519_unpack_vartime(&pt, fromhex(tests[i].pt));
+		ge25519_scalarmult_base_wrapper(&pt2, sc);
+		ck_assert_int_eq(ge25519_eq(&pt, &pt2), 1);
+	}
+}
+END_TEST
+
+
 START_TEST(test_xmr_ge25519_ops)
 {
 	int tests[] = {1, 2, 7, 8, 637, 9912, 12345};
@@ -5500,6 +5549,7 @@ Suite *test_suite(void)
 	tcase_add_test(tc, test_xmr_curve25519_tests);
 	tcase_add_test(tc, test_xmr_curve25519_expand_reduce);
 	tcase_add_test(tc, test_xmr_ge25519_check);
+	tcase_add_test(tc, test_xmr_ge25519_scalarmult_base_wrapper_check);
 	tcase_add_test(tc, test_xmr_ge25519_ops);
 	suite_add_tcase(s, tc);
 
