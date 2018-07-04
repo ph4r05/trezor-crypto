@@ -323,33 +323,6 @@ int ge25519_check(const ge25519 *r){
 	return c1 & (c2^0x1) & (c3^0x1);
 }
 
-int ge25519_fromfe_check(const ge25519 *r){
-	bignum25519 u={0}, v={0}, x={0}, z={0}, vxx={0}, check={0};
-	int ok = 1;
-	int err = 1;
-
-	curve25519_set(z, 1);
-	curve25519_square(u, r->y);
-	curve25519_mul(v, u, fe_d);
-	curve25519_sub_reduce(u, u, z);  // u = y^2-1
-	curve25519_add_reduce(v, v, z);  // v = dy^2+1
-
-	curve25519_divpowm1(x, u, v);
-	curve25519_sub_reduce(vxx, r->x, x);
-	ok &= curve25519_isnonzero(vxx) ^ 1;
-
-	// x = uv^3(uv^7)^((q-5)/8)
-	curve25519_square(vxx, r->x);
-	curve25519_mul(vxx, vxx, v);
-	curve25519_sub_reduce(check, vxx, u);  // vx^2-u
-
-	err &= curve25519_isnonzero(check);
-	curve25519_add_reduce(check, vxx, u);
-	err &= curve25519_isnonzero(check);
-	ok &= err ^ 1;
-	return ok;  // return 1 => OK
-}
-
 int ge25519_eq(const ge25519 *a, const ge25519 *b){
 	int eq = 1;
 	bignum25519 t1={0}, t2={0};
