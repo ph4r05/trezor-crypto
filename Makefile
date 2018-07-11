@@ -23,12 +23,14 @@ CFLAGS   += $(OPTFLAGS) \
             -Wformat-security \
             -Werror
 
+NO_VALGRIND ?= 0
+
 CFLAGS += -I.
+CFLAGS += -DNO_VALGRIND=$(NO_VALGRIND)
 CFLAGS += -DUSE_ETHEREUM=1
 CFLAGS += -DUSE_GRAPHENE=1
 CFLAGS += -DUSE_KECCAK=1
 CFLAGS += -DUSE_MONERO=1
-CFLAGS += -DNO_VALGRIND=1
 CFLAGS += -DUSE_NEM=1
 CFLAGS += -DUSE_CARDANO=1
 CFLAGS += $(shell pkg-config --cflags openssl)
