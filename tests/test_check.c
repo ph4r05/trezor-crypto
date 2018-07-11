@@ -6178,9 +6178,11 @@ Suite *test_suite(void)
 	tcase_add_test(tc, test_ed25519_modl_sub);
 	suite_add_tcase(s, tc);
 
+#if USE_MONERO
 	tc = tcase_create("ed25519_ge");
 	tcase_add_test(tc, test_ge25519_double_scalarmult_vartime2);
 	suite_add_tcase(s, tc);
+#endif
 
 	tc = tcase_create("script");
 	tcase_add_test(tc, test_output_script);
