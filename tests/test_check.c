@@ -31,7 +31,7 @@
 #include <check.h>
 #include "check_mem.h"
 
-#if !NO_VALGRIND
+#if VALGRIND
 #include <valgrind/valgrind.h>
 #include <valgrind/memcheck.h>
 #endif
@@ -65,7 +65,7 @@
 #include "nem.h"
 #include "monero/monero.h"
 
-#if !NO_VALGRIND
+#if VALGRIND
 /*
  * This is a clever trick to make Valgrind's Memcheck verify code
  * is constant-time with respect to secret data.
