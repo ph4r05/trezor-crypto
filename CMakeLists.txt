@@ -70,7 +70,7 @@ SET(SOURCES
         monero/serialize
         monero/crypto
         monero/xmr
-        monero/monero
+        monero/monero.h
         monero/range_proof
         address.c
         address.h

@@ -124,13 +124,11 @@ void copy256_modm(bignum256modm r, const bignum256modm x){
 
 int check256_modm(const bignum256modm x){
 	int ok = 1;
-	bignum256modm t={0};
+	bignum256modm t={0}, z={0};
 
 	ok &= iszero256_modm(x) ^ 1;
-	copy256_modm(t, x);
-	reduce256_modm(t);
+	barrett_reduce256_modm(t, z, x);
 	ok &= eq256_modm(t, x);
-
 	return ok;
 }
 
@@ -267,34 +265,21 @@ static void curve25519_divpowm1(bignum25519 r, const bignum25519 u, const bignum
 }
 
 void curve25519_expand_reduce(bignum25519 out, const unsigned char in[32]) {
-	const union { uint8_t b[2]; uint16_t s; } endian_check = {{1,0}};
-	uint32_t x0,x1,x2,x3,x4,x5,x6,x7;
-	if (endian_check.s == 1) {
-		/* Take care, this only works when in is aligned */
-		x0 = *(uint32_t *)(in + 0);
-		x1 = *(uint32_t *)(in + 4);
-		x2 = *(uint32_t *)(in + 8);
-		x3 = *(uint32_t *)(in + 12);
-		x4 = *(uint32_t *)(in + 16);
-		x5 = *(uint32_t *)(in + 20);
-		x6 = *(uint32_t *)(in + 24);
-		x7 = *(uint32_t *)(in + 28);
-	} else {
-#define F(s)                         \
+  uint32_t x0,x1,x2,x3,x4,x5,x6,x7;
+#define F(s)							 \
 			((((uint32_t)in[s + 0])      ) | \
 			 (((uint32_t)in[s + 1]) <<  8) | \
 			 (((uint32_t)in[s + 2]) << 16) | \
 			 (((uint32_t)in[s + 3]) << 24))
-		x0 = F(0);
-		x1 = F(4);
-		x2 = F(8);
-		x3 = F(12);
-		x4 = F(16);
-		x5 = F(20);
-		x6 = F(24);
-		x7 = F(28);
+  x0 = F(0);
+  x1 = F(4);
+  x2 = F(8);
+  x3 = F(12);
+  x4 = F(16);
+  x5 = F(20);
+  x6 = F(24);
+  x7 = F(28);
 #undef F
-	}
 
 	out[0] = (                        x0       ) & reduce_mask_26;
 	out[1] = ((((uint64_t)x1 << 32) | x0) >> 26) & reduce_mask_25;
@@ -336,27 +321,6 @@ int ge25519_check(const ge25519 *r){
 	const int c2 = curve25519_isnonzero(lhs);
 	const int c3 = curve25519_isnonzero(res);
 	return c1 & (c2^0x1) & (c3^0x1);
-}
-
-int ge25519_fromfe_check(const ge25519 *r){
-	bignum25519 u={0}, v={0}, z={0}, vxx={0}, check={0};
-	int err = 1;
-
-	curve25519_set(z, 1);
-	curve25519_square(u, r->y);
-	curve25519_mul(v, u, fe_d);
-	curve25519_sub_reduce(u, u, z);  // u = y^2-1
-	curve25519_add_reduce(v, v, z);  // v = dy^2+1
-
-	// x = uv^3(uv^7)^((q-5)/8)
-	curve25519_square(vxx, r->x);
-	curve25519_mul(vxx, vxx, v);
-	curve25519_sub_reduce(check, vxx, u);  // vx^2-u
-
-	err &= curve25519_isnonzero(check);
-	curve25519_add_reduce(check, vxx, u);
-	err &= curve25519_isnegative(check);
-	return err ^ 0x1;
 }
 
 int ge25519_eq(const ge25519 *a, const ge25519 *b){

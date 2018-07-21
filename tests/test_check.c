@@ -31,7 +31,7 @@
 #include <check.h>
 #include "check_mem.h"
 
-#ifndef NO_VALGRIND
+#if VALGRIND
 #include <valgrind/valgrind.h>
 #include <valgrind/memcheck.h>
 #endif
@@ -65,11 +65,12 @@
 #include "nem.h"
 #include "monero/monero.h"
 
+#if VALGRIND
 /*
  * This is a clever trick to make Valgrind's Memcheck verify code
  * is constant-time with respect to secret data.
  */
-#ifndef NO_VALGRIND
+
 /* Call after secret data is written, before first use */
 #define   MARK_SECRET_DATA(addr, len) VALGRIND_MAKE_MEM_UNDEFINED(addr, len)
 /* Call before secret data is freed or to mark non-secret data (public keys or signatures) */
@@ -1886,7 +1887,6 @@ START_TEST(test_ecdsa_signature)
 	uint8_t pubkey[65];
 	const ecdsa_curve *curve = &secp256k1;
 
-
 	// sha2(sha2("\x18Bitcoin Signed Message:\n\x0cHello World!"))
 	memcpy(digest, fromhex("de4e9524586d6fce45667f9ff12f661e79870c4105fa0fb58af976619bb11432"), 32);
 	// r = 2:  Four points should exist
@@ -2779,6 +2779,77 @@ START_TEST(test_mnemonic_check)
 }
 END_TEST
 
+START_TEST(test_mnemonic_to_entropy)
+{
+	static const char *vectors[] = {
+		"00000000000000000000000000000000",
+		"abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about",
+		"7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f",
+		"legal winner thank year wave sausage worth useful legal winner thank yellow",
+		"80808080808080808080808080808080",
+		"letter advice cage absurd amount doctor acoustic avoid letter advice cage above",
+		"ffffffffffffffffffffffffffffffff",
+		"zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong",
+		"000000000000000000000000000000000000000000000000",
+		"abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon agent",
+		"7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f",
+		"legal winner thank year wave sausage worth useful legal winner thank year wave sausage worth useful legal will",
+		"808080808080808080808080808080808080808080808080",
+		"letter advice cage absurd amount doctor acoustic avoid letter advice cage absurd amount doctor acoustic avoid letter always",
+		"ffffffffffffffffffffffffffffffffffffffffffffffff",
+		"zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo when",
+		"0000000000000000000000000000000000000000000000000000000000000000",
+		"abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon art",
+		"7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f",
+		"legal winner thank year wave sausage worth useful legal winner thank year wave sausage worth useful legal winner thank year wave sausage worth title",
+		"8080808080808080808080808080808080808080808080808080808080808080",
+		"letter advice cage absurd amount doctor acoustic avoid letter advice cage absurd amount doctor acoustic avoid letter advice cage absurd amount doctor acoustic bless",
+		"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+		"zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo vote",
+		"77c2b00716cec7213839159e404db50d",
+		"jelly better achieve collect unaware mountain thought cargo oxygen act hood bridge",
+		"b63a9c59a6e641f288ebc103017f1da9f8290b3da6bdef7b",
+		"renew stay biology evidence goat welcome casual join adapt armor shuffle fault little machine walk stumble urge swap",
+		"3e141609b97933b66a060dcddc71fad1d91677db872031e85f4c015c5e7e8982",
+		"dignity pass list indicate nasty swamp pool script soccer toe leaf photo multiply desk host tomato cradle drill spread actor shine dismiss champion exotic",
+		"0460ef47585604c5660618db2e6a7e7f",
+		"afford alter spike radar gate glance object seek swamp infant panel yellow",
+		"72f60ebac5dd8add8d2a25a797102c3ce21bc029c200076f",
+		"indicate race push merry suffer human cruise dwarf pole review arch keep canvas theme poem divorce alter left",
+		"2c85efc7f24ee4573d2b81a6ec66cee209b2dcbd09d8eddc51e0215b0b68e416",
+		"clutch control vehicle tonight unusual clog visa ice plunge glimpse recipe series open hour vintage deposit universe tip job dress radar refuse motion taste",
+		"eaebabb2383351fd31d703840b32e9e2",
+		"turtle front uncle idea crush write shrug there lottery flower risk shell",
+		"7ac45cfe7722ee6c7ba84fbc2d5bd61b45cb2fe5eb65aa78",
+		"kiss carry display unusual confirm curtain upgrade antique rotate hello void custom frequent obey nut hole price segment",
+		"4fa1a8bc3e6d80ee1316050e862c1812031493212b7ec3f3bb1b08f168cabeef",
+		"exile ask congress lamp submit jacket era scheme attend cousin alcohol catch course end lucky hurt sentence oven short ball bird grab wing top",
+		"18ab19a9f54a9274f03e5209a2ac8a91",
+		"board flee heavy tunnel powder denial science ski answer betray cargo cat",
+		"18a2e1d81b8ecfb2a333adcb0c17a5b9eb76cc5d05db91a4",
+		"board blade invite damage undo sun mimic interest slam gaze truly inherit resist great inject rocket museum chief",
+		"15da872c95a13dd738fbf50e427583ad61f18fd99f628c417a61cf8343c90419",
+		"beyond stage sleep clip because twist token leaf atom beauty genius food business side grid unable middle armed observe pair crouch tonight away coconut",
+		0,
+		0,
+	};
+
+	const char **a, **b;
+	uint8_t entropy[64];
+
+	a = vectors;
+	b = vectors + 1;
+	while (*a && *b) {
+		int seed_len = mnemonic_to_entropy(*b, entropy);
+		ck_assert_int_eq(seed_len % 33, 0);
+		seed_len = seed_len * 4 / 33;
+		ck_assert_int_eq(seed_len, strlen(*a) / 2);
+		ck_assert_mem_eq(entropy, fromhex(*a), seed_len);
+		a += 2; b += 2;
+	}
+}
+END_TEST
+
 START_TEST(test_address)
 {
 	char address[36];
@@ -3573,50 +3644,6 @@ START_TEST(test_ed25519_modl_sub)
 }
 END_TEST
 
-START_TEST(test_xmr_base58)
-{
-	static const struct {
-		uint64_t tag;
-		char * v1;
-		char * v2;
-	} tests[] = {
-		{0x12,
-			"3bec484c5d7f0246af520aab550452b5b6013733feabebd681c4a60d457b7fc12d5918e31d3c003da3c778592c07b398ad6f961a67082a75fd49394d51e69bbe",
-			"43tpGG9PKbwCpjRvNLn1jwXPpnacw2uVUcszAtgmDiVcZK4VgHwjJT9BJz1WGF9eMxSYASp8yNMkuLjeQfWqJn3CNWdWfzV"
-		},
-		{0x12,
-			"639050436fa36c8288706771412c5972461578d564188cd7fc6f81d6973d064fa461afe66fb23879936d7225051bebbf7f3ae0c801a90bb99fbb346b2fd4d702",
-			"45PwgoUKaDHNqLL8o3okzLL7biv7GqPVmd8LTcTrYVrMEKdSYwFcyJfMLSRpfU3nh8Z2m81FJD4sUY3nXCdGe61k1HAp8T1"
-		},
-		{53,
-			"5a10cca900ee47a7f412cd661b29f5ab356d6a1951884593bb170b5ec8b6f2e83b1da411527d062c9fedeb2dad669f2f5585a00a88462b8c95c809a630e5734c",
-			"9vacMKaj8JJV6MnwDzh2oNVdwTLJfTDyNRiB6NzV9TT7fqvzLivH2dB8Tv7VYR3ncn8vCb3KdNMJzQWrPAF1otYJ9cPKpkr"
-		},
-	};
-
-	uint8_t rawn[512];
-	char strn[512];
-	int r;
-	uint64_t tag;
-
-	for (size_t i = 0; i < (sizeof(tests) / sizeof(*tests)); i++) {
-		const char *raw = tests[i].v1;
-		const char *str = tests[i].v2;
-		const size_t len = strlen(raw) / 2;
-
-		memcpy(rawn, fromhex(raw), len);
-
-		r = xmr_base58_addr_encode_check(tests[i].tag, rawn, len, strn, sizeof(strn));
-		ck_assert_int_eq((size_t)r, strlen(str));
-    ck_assert_mem_eq(strn, str, r);
-
-		r = xmr_base58_addr_decode_check(strn, r, &tag, rawn, len);
-		ck_assert_int_eq(r, len);
-		ck_assert_mem_eq(rawn, fromhex(raw), len);
-	}
-}
-END_TEST
-
 START_TEST(test_ge25519_double_scalarmult_vartime2)
 {
 	char tests[][5][65] = {
@@ -3853,7 +3880,45 @@ START_TEST(test_ethereum_address)
 	const char **vec = vectors;
 	while (*vec) {
 		memcpy(addr, fromhex(*vec), 20);
-		ethereum_address_checksum(addr, address);
+		ethereum_address_checksum(addr, address, false, 0);
+		ck_assert_str_eq(address, *vec);
+		vec++;
+	}
+}
+END_TEST
+
+// test vectors from https://github.com/rsksmart/RSKIPs/blob/master/IPs/RSKIP60.md
+START_TEST(test_rsk_address)
+{
+	uint8_t addr[20];
+	char address[41];
+
+	static const char *rskip60_chain30[] = {
+		"5aaEB6053f3e94c9b9a09f33669435E7ef1bEAeD",
+		"Fb6916095cA1Df60bb79ce92cE3EA74c37c5d359",
+		"DBF03B407c01E7CD3cBea99509D93F8Dddc8C6FB",
+		"D1220A0Cf47c7B9BE7a2e6ba89F429762E7B9adB",
+		0
+	};
+	const char **vec = rskip60_chain30;
+	while (*vec) {
+		memcpy(addr, fromhex(*vec), 20);
+		ethereum_address_checksum(addr, address, true, 30);
+		ck_assert_str_eq(address, *vec);
+		vec++;
+	}
+
+	static const char *rskip60_chain31[] = {
+		"5aAeb6053F3e94c9b9A09F33669435E7EF1BEaEd",
+		"Fb6916095CA1dF60bb79CE92ce3Ea74C37c5D359",
+		"dbF03B407C01E7cd3cbEa99509D93f8dDDc8C6fB",
+		"d1220a0CF47c7B9Be7A2E6Ba89f429762E7b9adB",
+		0
+	};
+	vec = rskip60_chain31;
+	while (*vec) {
+		memcpy(addr, fromhex(*vec), 20);
+		ethereum_address_checksum(addr, address, true, 31);
 		ck_assert_str_eq(address, *vec);
 		vec++;
 	}
@@ -4692,8 +4757,15 @@ START_TEST(test_rc4_rfc6229)
 END_TEST
 
 #include "test_check_segwit.h"
-
 #include "test_check_cashaddr.h"
+
+#if USE_CARDANO
+#include "test_check_cardano.h"
+#endif
+
+#if USE_MONERO
+#include "test_check_monero.h"
+#endif
 
 // define test suite and cases
 Suite *test_suite(void)
@@ -4794,6 +4866,10 @@ Suite *test_suite(void)
 	tc = tcase_create("ethereum_address");
 	tcase_add_test(tc, test_ethereum_address);
 	suite_add_tcase(s, tc);
+	
+	tc = tcase_create("rsk_address");
+	tcase_add_test(tc, test_rsk_address);
+	suite_add_tcase(s, tc);
 
 	tc = tcase_create("wif");
 	tcase_add_test(tc, test_wif);
@@ -4836,6 +4912,7 @@ Suite *test_suite(void)
 	tc = tcase_create("bip39");
 	tcase_add_test(tc, test_mnemonic);
 	tcase_add_test(tc, test_mnemonic_check);
+	tcase_add_test(tc, test_mnemonic_to_entropy);
 	suite_add_tcase(s, tc);
 
 	tc = tcase_create("pubkey_validity");
@@ -4889,13 +4966,11 @@ Suite *test_suite(void)
 	tcase_add_test(tc, test_ed25519_modl_sub);
 	suite_add_tcase(s, tc);
 
-	tc = tcase_create("xmr_base58");
-	tcase_add_test(tc, test_xmr_base58);
-	suite_add_tcase(s, tc);
-
+#if USE_MONERO
 	tc = tcase_create("ed25519_ge");
 	tcase_add_test(tc, test_ge25519_double_scalarmult_vartime2);
 	suite_add_tcase(s, tc);
+#endif
 
 	tc = tcase_create("script");
 	tcase_add_test(tc, test_output_script);
@@ -4938,6 +5013,61 @@ Suite *test_suite(void)
 	tc = tcase_create("cashaddr");
 	tcase_add_test(tc, test_cashaddr);
 	suite_add_tcase(s, tc);
+
+#if USE_MONERO
+	tc = tcase_create("xmr_base58");
+	tcase_add_test(tc, test_xmr_base58);
+	suite_add_tcase(s, tc);
+
+	tc = tcase_create("xmr_crypto");
+	tcase_add_test(tc, test_xmr_getset256_modm);
+	tcase_add_test(tc, test_xmr_cmp256_modm);
+	tcase_add_test(tc, test_xmr_copy_check_modm);
+	tcase_add_test(tc, test_xmr_mulsub256_modm);
+	tcase_add_test(tc, test_xmr_muladd256_modm);
+	tcase_add_test(tc, test_xmr_curve25519_set);
+	tcase_add_test(tc, test_xmr_curve25519_consts);
+	tcase_add_test(tc, test_xmr_curve25519_tests);
+	tcase_add_test(tc, test_xmr_curve25519_expand_reduce);
+	tcase_add_test(tc, test_xmr_ge25519_base);
+	tcase_add_test(tc, test_xmr_ge25519_check);
+	tcase_add_test(tc, test_xmr_ge25519_scalarmult_base_wrapper);
+	tcase_add_test(tc, test_xmr_ge25519_scalarmult_wrapper);
+	tcase_add_test(tc, test_xmr_ge25519_ops);
+	suite_add_tcase(s, tc);
+
+	tc = tcase_create("xmr_xmr");
+	tcase_add_test(tc, test_xmr_check_point);
+	tcase_add_test(tc, test_xmr_h);
+	tcase_add_test(tc, test_xmr_fast_hash);
+	tcase_add_test(tc, test_xmr_hasher);
+	tcase_add_test(tc, test_xmr_hash_to_scalar);
+	tcase_add_test(tc, test_xmr_hash_to_ec);
+	tcase_add_test(tc, test_xmr_derivation_to_scalar);
+	tcase_add_test(tc, test_xmr_generate_key_derivation);
+	tcase_add_test(tc, test_xmr_derive_private_key);
+	tcase_add_test(tc, test_xmr_derive_public_key);
+	tcase_add_test(tc, test_xmr_add_keys2);
+	tcase_add_test(tc, test_xmr_add_keys3);
+	tcase_add_test(tc, test_xmr_get_subaddress_secret_key);
+	tcase_add_test(tc, test_xmr_gen_c);
+	tcase_add_test(tc, test_xmr_varint);
+	tcase_add_test(tc, test_xmr_gen_range_sig);
+	suite_add_tcase(s, tc);
+#endif
+
+#if USE_CARDANO
+	tc = tcase_create("bip32-cardano");
+	tcase_add_test(tc, test_bip32_cardano_hdnode_vector_1);
+	tcase_add_test(tc, test_bip32_cardano_hdnode_vector_2);
+	tcase_add_test(tc, test_bip32_cardano_hdnode_vector_3);
+	tcase_add_test(tc, test_bip32_cardano_hdnode_vector_4);
+	tcase_add_test(tc, test_bip32_cardano_hdnode_vector_5);
+	tcase_add_test(tc, test_bip32_cardano_hdnode_vector_6);
+	tcase_add_test(tc, test_bip32_cardano_hdnode_vector_7);
+	tcase_add_test(tc, test_ed25519_cardano_sign_vectors);
+	suite_add_tcase(s,tc);
+#endif
 
 	return s;
 }

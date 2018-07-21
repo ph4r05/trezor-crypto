@@ -49,7 +49,7 @@ install:
   - ./travis-install-libsodium.sh
   - export PKG_CONFIG_PATH=$HOME/libsodium/lib/pkgconfig:$PKG_CONFIG_PATH
   - export LD_LIBRARY_PATH=$HOME/libsodium/lib:$LD_LIBRARY_PATH
-  - $PYTHON -m pip install --user pytest ecdsa curve25519-donna
+  - $PYTHON -m pip install --user pytest ecdsa curve25519-donna pyasn1
 
 script:
   - make
@@ -59,6 +59,6 @@ script:
   - ./tests/test_check
   - CK_TIMEOUT_MULTIPLIER=20 valgrind -q --error-exitcode=1 ./tests/test_check
   - ./tests/test_openssl 1000
-  - cd ./tests ; ITERS=10 $PYTHON -m pytest ; cd ..
+  - ITERS=10 $PYTHON -m pytest tests/
 
 

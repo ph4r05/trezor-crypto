@@ -23,14 +23,16 @@ CFLAGS   += $(OPTFLAGS) \
             -Wformat-security \
             -Werror
 
+VALGRIND ?= 1
+
 CFLAGS += -I.
+CFLAGS += -DVALGRIND=$(VALGRIND)
 CFLAGS += -DUSE_ETHEREUM=1
 CFLAGS += -DUSE_GRAPHENE=1
 CFLAGS += -DUSE_KECCAK=1
 CFLAGS += -DUSE_MONERO=1
-CFLAGS += -DNO_VALGRIND=1
 CFLAGS += -DUSE_NEM=1
-CFLAGS += -DUSE_MONERO=1
+CFLAGS += -DUSE_CARDANO=1
 CFLAGS += $(shell pkg-config --cflags openssl)
 
 # disable certain optimizations and features when small footprint is required
@@ -54,7 +56,6 @@ SRCS  += monero/serialize.c
 SRCS  += monero/crypto.c
 SRCS  += monero/xmr.c
 SRCS  += monero/range_proof.c
-SRCS  += monero/monero.c
 SRCS  += blake256.c
 SRCS  += blake2b.c blake2s.c
 SRCS  += groestl.c
@@ -86,7 +87,7 @@ tests: tests/test_check tests/test_openssl tests/test_speed tests/libtrezor-cryp
 tests/aestst: aes/aestst.o aes/aescrypt.o aes/aeskey.o aes/aestab.o
 	$(CC) $^ -o $@
 
-tests/test_check.o: tests/test_check_segwit.h tests/test_check_cashaddr.h
+tests/test_check.o: tests/test_check_cardano.h tests/test_check_monero.h tests/test_check_cashaddr.h tests/test_check_segwit.h
 
 tests/test_check: tests/test_check.o $(OBJS)
 	$(CC) tests/test_check.o $(OBJS) $(TESTLIBS) -o tests/test_check
@@ -98,7 +99,7 @@ tests/test_openssl: tests/test_openssl.o $(OBJS)
 	$(CC) tests/test_openssl.o $(OBJS) $(TESTSSLLIBS) -o tests/test_openssl
 
 tests/libtrezor-crypto.so: $(SRCS)
-	$(CC) $(CFLAGS) -fPIC -shared $(SRCS) -o tests/libtrezor-crypto.so
+	$(CC) $(CFLAGS) -DAES_128 -DAES_192 -fPIC -shared $(SRCS) -o tests/libtrezor-crypto.so
 
 tools: tools/xpubaddrgen tools/mktable tools/bip39bruteforce
 

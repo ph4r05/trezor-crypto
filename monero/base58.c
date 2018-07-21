@@ -35,29 +35,16 @@
 #include "base58.h"
 #include "int-util.h"
 #include "sha2.h"
-#include "memzero.h"
+#include "../base58.h"
 
-
-const char alphabet[] = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
-const size_t alphabet_size = sizeof(alphabet) - 1;
+const size_t alphabet_size = 58; // sizeof(b58digits_ordered) - 1;
 const size_t encoded_block_sizes[] = {0, 2, 3, 5, 6, 7, 9, 10, 11};
 const size_t full_block_size = sizeof(encoded_block_sizes) / sizeof(encoded_block_sizes[0]) - 1;
 const size_t full_encoded_block_size = 11; // encoded_block_sizes[full_block_size];
 const size_t addr_checksum_size = 4;
 const int decoded_block_sizes[] = {0, -1, 1, 2, -1, 3, 4, 5, -1, 6, 7, 8};
+#define reverse_alphabet(letter) ((int8_t) b58digits_map[(int)letter])
 
-static const int8_t reverse_alphabet_tbl[] = {
-		0,  1,  2,  3,  4,  5,  6,  7,  8, -1, -1, -1, -1, -1, -1, -1,
-		9, 10, 11, 12, 13, 14, 15, 16, -1, 17, 18, 19, 20, 21, -1, 22,
-		23, 24, 25, 26, 27, 28, 29, 30, 31, 32, -1, -1, -1, -1, -1, -1,
-		33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, -1, 44, 45, 46, 47,
-		48, 49, 50, 51, 52, 53, 54, 55, 56, 57
-};
-
-static inline int8_t reverse_alphabet(char letter){
-	const ssize_t idx = (ssize_t)(letter - alphabet[0]);
-	return (int8_t) (idx >= 0 && (size_t)idx < sizeof(reverse_alphabet_tbl) ? reverse_alphabet_tbl[(size_t)idx] : -1);
-}
 
 uint64_t uint_8be_to_64(const uint8_t* data, size_t size)
 {
@@ -98,7 +85,7 @@ void encode_block(const char* block, size_t size, char* res)
 	{
 		uint64_t remainder = num % alphabet_size;
 		num /= alphabet_size;
-		res[i] = alphabet[remainder];
+		res[i] = b58digits_ordered[remainder];
 		--i;
 	}
 }
