@@ -2,39 +2,11 @@
 // Created by Dusan Klinec on 29/04/2018.
 //
 
-#ifndef TREZOR_XMR_CRYPTO_H
-#define TREZOR_XMR_CRYPTO_H
+#ifndef GE25519_H
+#define GE25519_H
 
-#include <stddef.h>
-#include <ed25519-donna/ed25519-donna.h>
-#include <hasher.h>
-
-/* 64bit uint to scalar value */
-void set256_modm(bignum256modm r, uint64_t v);
-
-/* scalar value to 64bit uint */
-int get256_modm(uint64_t * v, const bignum256modm r);
-
-/* equality test on two reduced scalar values */
-int eq256_modm(const bignum256modm x, const bignum256modm y);
-
-/* comparison of two reduced scalar values */
-int cmp256_modm(const bignum256modm x, const bignum256modm y);
-
-/* scalar null check, has to be reduced */
-int iszero256_modm(const bignum256modm x);
-
-/* simple copy, no reduction */
-void copy256_modm(bignum256modm r, const bignum256modm x);
-
-/* check if nonzero && same after reduction */
-int check256_modm(const bignum256modm x);
-
-/* (cc - aa * bb) % l */
-void mulsub256_modm(bignum256modm r, const bignum256modm a, const bignum256modm b, const bignum256modm c);
-
-/* (cc + aa * bb) % l */
-void muladd256_modm(bignum256modm r, const bignum256modm a, const bignum256modm b, const bignum256modm c);
+#include <stdint.h>
+#include "ed25519-donna.h"
 
 /* uint32_t to Zmod(2^255-19) */
 void curve25519_set(bignum25519 r, uint32_t x);
@@ -99,8 +71,4 @@ int ge25519_unpack_vartime(ge25519 *r, const unsigned char *s);
 /* aG, wrapper for niels base mult. */
 void ge25519_scalarmult_base_wrapper(ge25519 *r, const bignum256modm s);
 
-/* aP, wrapper. General purpose, normalizes after multiplication */
-void ge25519_scalarmult_wrapper(ge25519 *r, const ge25519 *P, const bignum256modm a);
-
-
-#endif //TREZOR_XMR_CRYPTO_H
+#endif
