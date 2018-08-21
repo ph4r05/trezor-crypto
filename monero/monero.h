@@ -13,12 +13,9 @@
 #error "Compile with -DUSE_KECCAK=1"
 #endif
 
-
 #include "base58.h"
-#include "crypto.h"
 #include "serialize.h"
 #include "xmr.h"
 #include "range_proof.h"
-
 
 #endif //TREZOR_CRYPTO_MONERO_H
